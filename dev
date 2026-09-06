@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
+export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"
+export GOTOOLCHAIN=local
+export CGO_ENABLED=0
+
+image='postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0'
+build() {
+  mkdir -p .build
+  go build -trimpath -o .build/dbtool ./cmd/dbtool
+  go test -c -trimpath -o .build/db.test ./db
+}
+case "${1:-help}" in
+  prepare)
+    docker pull "$image"
+    go mod download
+    build
+    echo 'Setup assets cached. Use bash dev up for offline database startup.'
+    ;;
+  build) GOPROXY=off GOSUMDB=off build ;;
+  up)
+    [[ -x .build/dbtool ]] || { echo 'Run bash dev prepare first.' >&2; exit 1; }
+    docker image inspect "$image" >/dev/null
+    docker compose run --rm --no-deps bootstrap
+    docker compose up -d --wait --wait-timeout 90 db
+    docker compose run --rm tools /app/dbtool migrate
+    docker compose run --rm tools /app/dbtool status
+    ;;
+  check)
+    GOPROXY=off GOSUMDB=off build
+    docker compose run --rm tools /app/db.test -test.v -test.timeout=120s
+    ;;
+  status) docker compose run --rm tools /app/dbtool status ;;
+  demo) docker compose run --rm tools /app/dbtool demo ;;
+  stop) docker compose stop db ;;
+  *)
+    echo 'Local database foundation (WSL/Linux). No hosted workflows.'
+    echo 'bash dev prepare  Download pinned setup assets and build tools (internet required).'
+    echo 'bash dev up       Start local PostgreSQL and migrate (no downloads).'
+    echo 'bash dev check    Test a separate temporary database; preserve the main database.'
+    echo 'bash dev demo     Show a synthetic metadata transaction, then roll it back.'
+    echo 'bash dev status   Show TLS, version, migration and real table counts.'
+    echo 'bash dev stop     Stop PostgreSQL and preserve all volumes.'
+    ;;
+esac

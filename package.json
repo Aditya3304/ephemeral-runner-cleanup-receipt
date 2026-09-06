@@ -1,0 +1,7 @@
+{
+  "name": "ephemeral-runner-cleanup-receipt",
+  "version": "0.1.0",
+  "private": true,
+  "engines": { "node": ">=24 <25" },
+  "workspaces": ["action", "dashboard"]
+}

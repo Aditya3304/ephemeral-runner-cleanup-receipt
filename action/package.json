@@ -1,0 +1,6 @@
+{
+  "name": "@cleanup-receipt/guard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reserved for milestone c: TypeScript Node 24 guard main/post implementation."
+}
