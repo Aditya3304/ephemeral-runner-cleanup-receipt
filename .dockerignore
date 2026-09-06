@@ -1,0 +1,8 @@
+**
+!.build
+!.build/proofctl
+!action
+!action/dist
+!action/dist/**
+!examples
+!examples/**

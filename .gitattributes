@@ -1,2 +1,7 @@
 * text=auto eol=lf
 *.cmd text eol=crlf
+
+# Vendor bundles are reproducible generated output. Preserve upstream template
+# strings (including intentional trailing spaces) rather than rewriting them.
+action/dist/** linguist-generated=true
+action/dist/*.js whitespace=-blank-at-eol

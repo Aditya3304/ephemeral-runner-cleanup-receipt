@@ -53,6 +53,7 @@ type State struct {
 	Token             string                 `json:"token"`
 	Namespace         string                 `json:"namespace"`
 	NamespaceUID      string                 `json:"namespace_uid"`
+	NamespaceScoped   bool                   `json:"namespace_scoped,omitempty"`
 	ClusterUID        string                 `json:"cluster_uid"`
 	Sandbox           string                 `json:"sandbox"`
 	Directories       map[string]DirIdentity `json:"directories"`
@@ -218,7 +219,14 @@ func Save(path string, s *State) error {
 	if closeErr != nil {
 		return closeErr
 	}
-	return os.Rename(name, path)
+	if err = os.Rename(name, path); err != nil {
+		return err
+	}
+	parent, err := os.Open(filepath.Dir(path))
+	if err != nil {
+		return err
+	}
+	return errors.Join(parent.Sync(), parent.Close())
 }
 
 // Control files must never be recreated inside a workspace just declared empty.

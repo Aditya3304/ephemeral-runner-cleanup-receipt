@@ -12,6 +12,16 @@ build() {
   go test -c -trimpath -o .build/db.test ./db
 }
 case "${1:-help}" in
+  ci-prepare) bash scripts/ci-prepare.sh ;;
+  ci-build) bash scripts/runner-build.sh ;;
+  ci-up) bash scripts/kind-up.sh; bash scripts/policy-up.sh ;;
+  ci-demo) python3 scripts/demo-ci.py pass fail ;;
+  ci-check) python3 scripts/demo-ci.py ;;
+  guard-check)
+    export PATH="$PWD/.build/node-v24.20.0-linux-x64/bin:$PATH"
+    npm run check --workspace action --offline
+    GOPROXY=off GOSUMDB=off go test -p 2 ./internal/coordinator ./cmd/localci
+    ;;
   cli-prepare) bash scripts/prepare-cli.sh ;;
   cli-build) GOPROXY=off GOSUMDB=off go build -p 2 -trimpath -o .build/proofctl ./cmd/proofctl ;;
   cli-check)
@@ -60,5 +70,11 @@ case "${1:-help}" in
     echo 'bash dev kind-up      Create/preserve the dedicated project cluster.'
     echo 'bash dev kind-check   Run real Kubernetes cleanup tests.'
     echo 'bash dev cli-demo     Create, inventory, clean and inspect a real local run.'
+    echo 'bash dev ci-prepare   Cache Node, guard dependencies, policy and runner images (setup).'
+    echo 'bash dev ci-build     Build and preload the pinned local runner (cached dependencies).'
+    echo 'bash dev ci-up        Check/start the local cluster and network policy controller.'
+    echo 'bash dev ci-demo      Run passing and failing jobs with automatic cleanup.'
+    echo 'bash dev ci-check     Run the real lifecycle and isolation checks.'
+    echo 'bash dev guard-check Test guard lifecycle and coordinator trust boundaries.'
     ;;
 esac

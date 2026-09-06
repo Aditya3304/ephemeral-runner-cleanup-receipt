@@ -95,15 +95,23 @@ func Wipe(ctx context.Context, s *State, name string) error {
 	if err = pinDirectory(fd, s.Directories["root"]); err != nil {
 		return err
 	}
-	markerFD, err := unix.Openat(fd, ".proof-owner", unix.O_RDONLY|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0)
+	markerFD, err := unix.Openat(fd, ".proof-owner", unix.O_RDONLY|unix.O_NONBLOCK|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0)
 	if err != nil {
 		return err
 	}
 	marker := os.NewFile(uintptr(markerFD), "owner")
-	data := make([]byte, 33)
-	n, readErr := marker.Read(data)
+	info, err := marker.Stat()
+	if err != nil {
+		marker.Close()
+		return err
+	}
+	if !info.Mode().IsRegular() || info.Size() != 32 {
+		marker.Close()
+		return errors.New("sandbox ownership marker must be a 32-byte regular file")
+	}
+	data, readErr := io.ReadAll(io.LimitReader(marker, 33))
 	marker.Close()
-	if readErr != nil || n != 32 || string(data[:n]) != s.Token {
+	if readErr != nil || len(data) != 32 || string(data) != s.Token {
 		return errors.New("sandbox ownership marker mismatch")
 	}
 	child, err := childDirectory(fd, name)

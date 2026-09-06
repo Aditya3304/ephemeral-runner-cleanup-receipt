@@ -1,0 +1,52 @@
+# Data-only staging writes. A runner may not add deletion-blocking finalizers,
+# change ownership labels, or replace owner references on its staging objects.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: proof-guard-staging-integrity
+  labels:
+    app.kubernetes.io/managed-by: localci
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [UPDATE]
+        resources: [configmaps]
+  matchConditions:
+    - name: guard-in-own-runner-namespace
+      expression: "request.namespace.startsWith('proof-runner-') && request.userInfo.username == 'system:serviceaccount:' + request.namespace + ':guard'"
+  validations:
+    - expression: "object.metadata.name in ['guard-stage', 'runner-gate-request']"
+      message: Guard writes must target the assigned staging objects.
+      reason: Forbidden
+    - expression: "has(object.metadata.labels) == has(oldObject.metadata.labels) && (!has(object.metadata.labels) || object.metadata.labels == oldObject.metadata.labels)"
+      message: Guard cannot change staging ownership labels.
+      reason: Forbidden
+    - expression: "has(object.metadata.finalizers) == has(oldObject.metadata.finalizers) && (!has(object.metadata.finalizers) || object.metadata.finalizers == oldObject.metadata.finalizers)"
+      message: Guard cannot change staging finalizers.
+      reason: Forbidden
+    - expression: "has(object.metadata.ownerReferences) == has(oldObject.metadata.ownerReferences) && (!has(object.metadata.ownerReferences) || object.metadata.ownerReferences == oldObject.metadata.ownerReferences)"
+      message: Guard cannot change staging owner references.
+      reason: Forbidden
+    - expression: "!has(object.immutable) || !object.immutable"
+      message: Guard cannot make staging immutable.
+      reason: Forbidden
+    - expression: "!has(object.binaryData) || size(object.binaryData) == 0"
+      message: Staging accepts bounded JSON text only.
+      reason: Forbidden
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: proof-guard-staging-integrity
+  labels:
+    app.kubernetes.io/managed-by: localci
+spec:
+  policyName: proof-guard-staging-integrity
+  validationActions: [Deny]
+  matchResources:
+    namespaceSelector:
+      matchLabels:
+        app.kubernetes.io/managed-by: localci

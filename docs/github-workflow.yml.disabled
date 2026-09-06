@@ -1,0 +1,35 @@
+# DISABLED: documentation only. No workflow is installed in .github/workflows.
+# Requires a coordinator-provisioned ephemeral Linux Kubernetes runner.
+# Its image contains immutable /opt/guard and /usr/local/bin/proofctl; provision
+# a read-only .guard directory in GITHUB_WORKSPACE containing action.yml + dist.
+# Assignment, tokenFile kubeconfig, projected token/CA, runner namespace,
+# KUBERNETES_SERVICE_HOST/PORT, /data and /control are provisioned externally.
+# Hosted cancellation and automatic post execution have NOT been validated.
+name: Cleanup guard adapter (unvalidated)
+on:
+  workflow_dispatch:
+permissions: {}
+jobs:
+  guarded:
+    runs-on: [self-hosted, linux, cleanup-receipt-ephemeral]
+    timeout-minutes: 20
+    env:
+      PROOF_CTL: /usr/local/bin/proofctl
+      PROOF_ASSIGNMENT: /assignment/assignment.json
+      PROOF_KUBECONFIG: /assignment/kubeconfig
+      PROOF_STATE: /control/context.json
+      PROOF_SANDBOX_ROOT: /data
+      PROOF_TRANSPORT: github
+      # External controller must bind assignment.identity.provider=github and
+      # repository/run_id/run_attempt/job_id/source_revision to this exact run.
+    steps:
+      - name: Begin guard (registers automatic post)
+        id: guard
+        uses: ./.guard
+      - name: Example disposable command
+        working-directory: ${{ steps.guard.outputs.workspace }}
+        shell: bash
+        run: node -e 'require("node:fs").writeFileSync("example.txt", "disposable\n")'
+      # No manual post step: action.yml registers dist/post.js with always().
+      # No id-token, archive, DB credentials or checkout action. Artifact upload
+      # uses only GitHub's injected runtime artifact token, with one-day retention.

@@ -1,0 +1,5 @@
+!dist/
+!dist/*.js
+!dist/*.json
+!dist/*.txt
+work/

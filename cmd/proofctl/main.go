@@ -47,19 +47,26 @@ func root() *cobra.Command {
 		return func() { unix.Flock(int(f.Fd()), unix.LOCK_UN); f.Close() }, nil
 	}
 	var id proof.Identity
-	var base string
-	begin := &cobra.Command{Use: "begin", Short: "Create a fresh owned namespace and disposable directories", Args: cobra.NoArgs, RunE: func(cmd *cobra.Command, _ []string) error {
+	var base, assignmentPath string
+	begin := &cobra.Command{Use: "begin", Short: "Begin with a fresh namespace or a coordinator assignment and new disposable directories", Args: cobra.NoArgs, RunE: func(cmd *cobra.Command, _ []string) error {
+		if base == "" {
+			return errors.New("--sandbox-root is required")
+		}
+		var assignment *proof.Assignment
+		var err error
+		if cmd.Flags().Changed("assignment") {
+			assignment, err = proof.LoadAssignment(assignmentPath)
+		} else {
+			err = id.Validate()
+		}
+		if err != nil {
+			return err
+		}
 		release, err := lock()
 		if err != nil {
 			return err
 		}
 		defer release()
-		if base == "" {
-			return errors.New("--sandbox-root is required")
-		}
-		if err = id.Validate(); err != nil {
-			return err
-		}
 		reserve, err := os.OpenFile(statePath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
 		if err != nil {
 			return fmt.Errorf("context must be new: %w", err)
@@ -72,13 +79,18 @@ func root() *cobra.Command {
 		}
 		ctx, cancel := context.WithTimeout(cmd.Context(), 30*time.Second)
 		defer cancel()
-		s, err := e.Begin(ctx, id, base)
+		var s *proof.State
+		if assignment != nil {
+			s, err = e.BeginAssigned(ctx, *assignment, base)
+		} else {
+			s, err = e.Begin(ctx, id, base)
+		}
 		if err != nil {
 			os.Remove(statePath)
 			return err
 		}
 		if err = proof.Save(statePath, s); err != nil {
-			return fmt.Errorf("namespace %s created but context save failed: %w", s.Namespace, err)
+			return fmt.Errorf("namespace %s initialized but context save failed: %w", s.Namespace, err)
 		}
 		data, err := proof.Canonical(s)
 		if err != nil {
@@ -88,12 +100,16 @@ func root() *cobra.Command {
 		return err
 	}}
 	begin.Flags().StringVar(&base, "sandbox-root", "", "Parent for a NEW proof-<token> sandbox")
+	begin.Flags().StringVar(&assignmentPath, "assignment", "", "Strict coordinator assignment JSON file; uses only the assigned resource namespace")
 	begin.Flags().StringVar(&id.Provider, "provider", "local", "local or github")
 	begin.Flags().StringVar(&id.Repository, "repository", "", "Repository identity")
 	begin.Flags().StringVar(&id.Run, "run", "", "CI run identity")
 	begin.Flags().IntVar(&id.Attempt, "attempt", 1, "CI run attempt")
 	begin.Flags().StringVar(&id.Job, "job", "", "Job identity")
 	begin.Flags().StringVar(&id.Revision, "revision", "", "Full source commit hash")
+	for _, flag := range []string{"provider", "repository", "run", "attempt", "job", "revision"} {
+		begin.MarkFlagsMutuallyExclusive("assignment", flag)
+	}
 	root.AddCommand(begin)
 	var timeout time.Duration
 	for _, name := range []string{"inventory", "cleanup"} {

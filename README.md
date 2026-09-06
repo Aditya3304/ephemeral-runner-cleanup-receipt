@@ -4,14 +4,19 @@ A local, offline-capable cleanup evidence pipeline for disposable Kubernetes CI
 runners. Built with Go, PostgreSQL, a TypeScript guard, a trusted Sigstore finalizer,
 S3-compatible evidence storage and a React dashboard.
 
-**Current milestone: b — cleanup CLI and real kind tests.** PostgreSQL and cleanup
-are implemented. Offline Cosign verification works; the private signing service,
-trusted finalizer, API and dashboard remain pending. No GitHub workflows or AWS
-resources are running.
+**Current milestone: c — guard and local CI coordinator (validation in progress).**
+PostgreSQL, cleanup CLI, Node 24 guard and local coordinator are implemented.
+Offline Cosign verification works; the private signing service, trusted finalizer,
+API and dashboard remain pending. No GitHub workflows or AWS resources are running.
 
 For the CLI, run `bash dev cli-demo` after `bash dev cli-prepare` and
 `bash dev kind-up`. See the [CLI guide](docs/cli.md) and
 [CLI validation record](docs/cli-validation.md).
+
+For automatic job cleanup, see the [local CI guide](docs/local-ci.md) and
+[guard contract](docs/guard.md). `bash dev ci-demo` runs a passing and a failing
+local job after one-time `bash dev ci-prepare` setup. Both should invoke cleanup;
+evidence remains unsigned and partial until trusted finalization is implemented.
 
 ## Run the foundation
 
@@ -47,11 +52,14 @@ demo must produce actual signatures from private Sigstore services.
 - Completion/filter indexes, GIN text search and partial incident/retry indexes.
 - Separate administrative and restricted API roles; TCP requires TLS and SCRAM.
 - A local CA, passwords and server key stored in Docker volumes, outside Git.
-- Go tooling, Node 24 workspace metadata, and explicit Action/dashboard boundaries.
+- Go tooling, pinned Node 24 runtime, and explicit Action/dashboard boundaries.
 - Go/Cobra/client-go `proofctl`: begin, inventory, cleanup, receipt and verify.
 - Dedicated kind cluster with UID-bound cleanup, safe filesystem deletion and
   explicit partial/failed preliminary evidence.
 - Pinned Cosign and genuine upstream offline bundle tests; private signing is pending.
+- Node 24 guard main/post, local staging and a durable Go CI coordinator.
+- Restricted runners with a verified network startup gate, resource quotas and
+  protected staging metadata; cancellation and restart recovery.
 
 ## Trust and limitations
 

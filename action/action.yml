@@ -1,0 +1,14 @@
+name: Ephemeral cleanup guard
+description: Record preliminary cleanup evidence for a coordinator-provisioned runner
+outputs:
+  workspace:
+    description: Fresh disposable workspace
+  credentials:
+    description: Disposable credential directory
+  namespace:
+    description: Assigned Kubernetes namespace
+runs:
+  using: node24
+  main: dist/main.js
+  post: dist/post.js
+  post-if: always()

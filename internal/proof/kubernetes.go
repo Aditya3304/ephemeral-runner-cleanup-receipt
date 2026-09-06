@@ -65,27 +65,32 @@ func (e *Engine) Begin(ctx context.Context, id Identity, base string) (*State, e
 	return s, s.Validate()
 }
 func (e *Engine) Check(ctx context.Context, s *State) (bool, error) {
+	ns, err := e.checkNamespace(ctx, s)
+	return ns != nil, err
+}
+
+func (e *Engine) checkNamespace(ctx context.Context, s *State) (*core.Namespace, error) {
 	if err := s.Validate(); err != nil {
-		return false, err
+		return nil, err
 	}
 	cluster, err := e.K.CoreV1().Namespaces().Get(ctx, "kube-system", meta.GetOptions{})
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	if string(cluster.UID) != s.ClusterUID {
-		return false, errors.New("cluster identity changed")
+		return nil, errors.New("cluster identity changed")
 	}
 	ns, err := e.K.CoreV1().Namespaces().Get(ctx, s.Namespace, meta.GetOptions{})
 	if apierrors.IsNotFound(err) {
-		return false, nil
+		return nil, nil
 	}
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	if string(ns.UID) != s.NamespaceUID || ns.Labels[Label] != s.Token {
-		return false, errors.New("namespace ownership or UID mismatch; refusing cleanup")
+		return nil, errors.New("namespace ownership or UID mismatch; refusing cleanup")
 	}
-	return true, nil
+	return ns, nil
 }
 func contains(v []string, want string) bool {
 	for _, s := range v {
@@ -100,7 +105,7 @@ func refKey(r Ref) string {
 }
 func (e *Engine) Inventory(ctx context.Context, s *State) error {
 	s.InventoryComplete = false
-	exists, err := e.Check(ctx, s)
+	ns, err := e.checkNamespace(ctx, s)
 	if err != nil {
 		s.InventoryComplete = false
 		return err
@@ -109,7 +114,10 @@ func (e *Engine) Inventory(ctx context.Context, s *State) error {
 	for _, r := range s.Resources {
 		refs[refKey(r)] = r
 	}
-	if exists {
+	// Assigned runners lose namespaced RBAC during namespace GC. Once deletion
+	// starts, preserve recorded refs and scan only PVs; namespace absence below
+	// is the evidence for removal of its scoped objects.
+	if ns != nil && !(s.NamespaceScoped && (ns.DeletionTimestamp != nil || ns.Status.Phase == core.NamespaceTerminating)) {
 		type discoveryResult struct {
 			groups []*meta.APIResourceList
 			err    error
@@ -287,8 +295,9 @@ func (e *Engine) RemoveResources(ctx context.Context, s *State) error {
 	if exists {
 		// Mark the owned namespace terminating first. Deleting controller-managed
 		// objects in an active namespace can recreate default service accounts and
-		// root-CA config maps. Namespace GC removes its objects, then each recorded
-		// reference is independently checked for absence below.
+		// root-CA config maps. Namespace GC removes its objects. Ordinary contexts
+		// additionally check every recorded reference; assigned contexts rely on
+		// namespace absence because GC also removes their namespaced RBAC.
 		uid := types.UID(s.NamespaceUID)
 		policy := meta.DeletePropagationBackground
 		err = e.K.CoreV1().Namespaces().Delete(ctx, s.Namespace, meta.DeleteOptions{Preconditions: &meta.Preconditions{UID: &uid}, PropagationPolicy: &policy})
@@ -300,7 +309,7 @@ func (e *Engine) RemoveResources(ctx context.Context, s *State) error {
 	defer ticker.Stop()
 	for {
 		for _, r := range s.Resources {
-			if r.Namespace == "" {
+			if r.Namespace == "" && !s.NamespaceScoped {
 				if err = e.deleteRef(ctx, s, r); err != nil {
 					return err
 				}
@@ -321,6 +330,9 @@ func (e *Engine) RemoveResources(ctx context.Context, s *State) error {
 			}
 		}
 		for _, r := range s.Resources {
+			if s.NamespaceScoped && r.Namespace != "" {
+				continue
+			}
 			live, getErr := e.resource(r).Get(ctx, r.Name, meta.GetOptions{})
 			if apierrors.IsNotFound(getErr) {
 				continue
@@ -361,7 +373,11 @@ func (e *Engine) Cleanup(ctx context.Context, s *State) error {
 		s.Record("resources", "failed", resourceErr.Error())
 		failures = append(failures, resourceErr)
 	} else {
-		s.Record("resources", "verified", "Namespace and every inventoried UID confirmed absent")
+		reason := "Namespace and every inventoried UID confirmed absent"
+		if s.NamespaceScoped {
+			reason = "Assigned namespace confirmed absent after namespace GC; namespaced objects covered by namespace absence; every inventoried PV UID independently confirmed absent"
+		}
+		s.Record("resources", "verified", reason)
 	}
 	if resourceErr != nil {
 		s.Record("credentials", "failed", "Kubernetes service-account absence could not be confirmed")

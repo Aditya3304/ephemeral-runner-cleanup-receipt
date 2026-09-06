@@ -1,0 +1,142 @@
+# Firewall-only adaptation of the v2.10.0 upstream daemonset:
+# https://raw.githubusercontent.com/cloudnativelabs/kube-router/v2.10.0/daemonset/kube-router-firewall-daemonset.yaml
+# Keep kindnet and kube-proxy. No CNI installer/config or host kubeconfig mounts.
+# Isolation limitation: v2.10.0 exempts node-local ports 30000:32767 and some
+# ICMP traffic before pod policy evaluation. There is no flag to disable either.
+# --service-node-port-range=0:0 is INVALID (start must be less than end); 0:1
+# merely moves the bypass to port 1. Do not claim API-only host isolation here.
+# The kind PodCIDR includes unrelated system pods, so do not block that entire
+# CIDR as a substitute for a separately scoped runner isolation profile.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: proof-network-policy-controller
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: proof-network-policy-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: proof-network-policy-controller
+  labels:
+    app.kubernetes.io/name: proof-network-policy-controller
+rules:
+  - apiGroups: [""]
+    resources: [pods, namespaces, nodes]
+    verbs: [get, list, watch]
+  - apiGroups: [networking.k8s.io]
+    resources: [networkpolicies]
+    verbs: [get, list, watch]
+  # v2.10.0 starts and waits for these informers even with router/proxy disabled.
+  # They require only list/watch; no service programming or API writes are allowed.
+  - apiGroups: [""]
+    resources: [services]
+    verbs: [list, watch]
+  - apiGroups: [discovery.k8s.io]
+    resources: [endpointslices]
+    verbs: [list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: proof-network-policy-controller
+  labels:
+    app.kubernetes.io/name: proof-network-policy-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: proof-network-policy-controller
+subjects:
+  - kind: ServiceAccount
+    name: proof-network-policy-controller
+    namespace: kube-system
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: proof-network-policy-controller
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: proof-network-policy-controller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: proof-network-policy-controller
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: proof-network-policy-controller
+    spec:
+      serviceAccountName: proof-network-policy-controller
+      automountServiceAccountToken: true
+      priorityClassName: system-node-critical
+      # Host firewall privileges belong only to this trusted infrastructure pod.
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
+        - operator: Exists
+          effect: NoExecute
+      containers:
+        - name: kube-router
+          # Official v2.10.0 linux/amd64 manifest, verified with docker image inspect.
+          # Index: sha256:0991f2cc7aaabe107b51c0c554d6b843f0483fd319b94f437fab638470c47c22
+          image: docker.io/cloudnativelabs/kube-router:v2.10.0@sha256:81619a698b981a5c4fd6c89ae015d0faadce5d7a5270df7562c1743e58e3283f
+          imagePullPolicy: Never
+          args:
+            - --run-router=false
+            - --run-firewall=true
+            - --run-service-proxy=false
+            - --run-loadbalancer=false
+            - --enable-cni=false
+            - --iptables-sync-period=5s
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 20244
+            periodSeconds: 3
+            failureThreshold: 40
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 20244
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 20244
+            periodSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: lib-modules
+              mountPath: /lib/modules
+              readOnly: true
+            - name: xtables-lock
+              mountPath: /run/xtables.lock
+      volumes:
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+            type: Directory
+        - name: xtables-lock
+          hostPath:
+            path: /run/xtables.lock
+            type: FileOrCreate
