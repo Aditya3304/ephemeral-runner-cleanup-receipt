@@ -6,8 +6,8 @@ Each completed milestone is demonstrated and requires confirmation before the ne
 | Gate | Status | Scope |
 |---|---|---|
 | Plan approval | Approved | Local Kubernetes CI, private Sigstore, local MinIO/PostgreSQL; no paid cloud resources |
-| a: foundation | Complete; awaiting next-milestone confirmation | Repository, schema/migrations, TLS, restricted database roles and repeatable local commands |
-| b: cleanup CLI | Not started | Cobra/client-go commands and real kind cleanup |
+| a: foundation | Complete; milestone b approved | Repository, schema/migrations, TLS, restricted database roles and repeatable local commands |
+| b: cleanup CLI | Complete; awaiting confirmation for c | Cobra/client-go commands, real kind cleanup, canonical preliminary evidence and offline Sigstore verification |
 | c: guard/coordinator | Not started | Local job lifecycle and disabled GitHub adapter |
 | d: signing/finalizer | Not started | Local identity/Sigstore, trusted archival, canonical receipt |
 | e: API | Not started | Chi/pgx verification, sanitization, transactional ingestion and queries |
@@ -16,7 +16,19 @@ Each completed milestone is demonstrated and requires confirmation before the ne
 | h: hardening | Not started | End-to-end fault and offline-execution matrix |
 | i: local deployment | Not started | Packaging, backup and rehearsals; AWS remains excluded |
 
-## Explicit milestone a deferrals
+## Milestone b validation and remaining work
+
+The real CLI demo, filesystem/identity safety tests, four live Kubernetes scenarios,
+offline Sigstore positive/negative checks and Go vet passed. See
+[cli-validation.md](cli-validation.md) and [cli.md](cli.md) for evidence and commands.
+
+- Cleanup evidence is unsigned and partial. Logs and runner disposal remain unobservable.
+- Cosign 3.1.3 is now pinned locally for verification. Private signing is milestone d.
+- The developer kind cluster is real; restricted CI jobs and the guard/coordinator are c.
+- MinIO archival, trusted finalizer, API, dashboard, watchdog and system fault tests remain pending.
+- The full network-blocked application demonstration remains pending; no live GitHub or AWS runtime is used.
+
+## Historical milestone a deferrals (at its completion)
 
 - No Kubernetes cluster or runner created yet.
 - No signing, object archive, API or dashboard is claimed to work.

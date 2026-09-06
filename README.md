@@ -4,9 +4,14 @@ A local, offline-capable cleanup evidence pipeline for disposable Kubernetes CI
 runners. Built with Go, PostgreSQL, a TypeScript guard, a trusted Sigstore finalizer,
 S3-compatible evidence storage and a React dashboard.
 
-**Current milestone: a — repository and PostgreSQL foundation.** The database is
-real; cleanup, signing, the API and the dashboard are not implemented yet. There
-are no running GitHub workflows and no AWS resources.
+**Current milestone: b — cleanup CLI and real kind tests.** PostgreSQL and cleanup
+are implemented. Offline Cosign verification works; the private signing service,
+trusted finalizer, API and dashboard remain pending. No GitHub workflows or AWS
+resources are running.
+
+For the CLI, run `bash dev cli-demo` after `bash dev cli-prepare` and
+`bash dev kind-up`. See the [CLI guide](docs/cli.md) and
+[CLI validation record](docs/cli-validation.md).
 
 ## Run the foundation
 
@@ -43,6 +48,10 @@ demo must produce actual signatures from private Sigstore services.
 - Separate administrative and restricted API roles; TCP requires TLS and SCRAM.
 - A local CA, passwords and server key stored in Docker volumes, outside Git.
 - Go tooling, Node 24 workspace metadata, and explicit Action/dashboard boundaries.
+- Go/Cobra/client-go `proofctl`: begin, inventory, cleanup, receipt and verify.
+- Dedicated kind cluster with UID-bound cleanup, safe filesystem deletion and
+  explicit partial/failed preliminary evidence.
+- Pinned Cosign and genuine upstream offline bundle tests; private signing is pending.
 
 ## Trust and limitations
 
@@ -79,6 +88,9 @@ scripts/            Local bootstrap and database initialization
 compose.yaml        Private local database and one-shot admin tools
 dev                 Repeatable WSL/Linux commands
 ```
+
+`internal/proof/` contains cleanup, canonical evidence and signature verification;
+`cmd/proofctl/` exposes the CLI. `scripts/demo-cli.py` runs the real demonstration.
 
 Never remove the project's Docker volumes to fix a routine startup problem. They
 contain persistent data and the local database identity. Startup preserves existing

@@ -12,6 +12,18 @@ build() {
   go test -c -trimpath -o .build/db.test ./db
 }
 case "${1:-help}" in
+  cli-prepare) bash scripts/prepare-cli.sh ;;
+  cli-build) GOPROXY=off GOSUMDB=off go build -p 2 -trimpath -o .build/proofctl ./cmd/proofctl ;;
+  cli-check)
+    export PROOF_COSIGN="$PWD/.build/cosign"
+    GOPROXY=off GOSUMDB=off go test -p 2 -count=1 -v ./internal/proof ./cmd/proofctl
+    ;;
+  kind-up) bash scripts/kind-up.sh ;;
+  cli-demo) python3 scripts/demo-cli.py ;;
+  kind-check)
+    export PROOF_KIND_CONFIG="$PWD/.build/kubeconfig"
+    GOPROXY=off GOSUMDB=off go test -p 2 -count=1 -v -run '^TestKindCleanup$' -timeout 180s ./internal/proof
+    ;;
   prepare)
     docker pull "$image"
     go mod download
@@ -42,5 +54,11 @@ case "${1:-help}" in
     echo 'bash dev demo     Show a synthetic metadata transaction, then roll it back.'
     echo 'bash dev status   Show TLS, version, migration and real table counts.'
     echo 'bash dev stop     Stop PostgreSQL and preserve all volumes.'
+    echo 'bash dev cli-prepare  Prepare pinned CLI tools (initial download).'
+    echo 'bash dev cli-build    Build proofctl with cached dependencies.'
+    echo 'bash dev cli-check    Filesystem, ownership and offline Sigstore checks.'
+    echo 'bash dev kind-up      Create/preserve the dedicated project cluster.'
+    echo 'bash dev kind-check   Run real Kubernetes cleanup tests.'
+    echo 'bash dev cli-demo     Create, inventory, clean and inspect a real local run.'
     ;;
 esac
