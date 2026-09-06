@@ -31,6 +31,5 @@ done <<< "$nodes"
 "${kube[@]}" apply -f infra/network-policy.yaml
 "${kube[@]}" apply -f infra/guard-admission.yaml
 "${kube[@]}" -n kube-system rollout status daemonset/proof-network-policy-controller --timeout=180s
-echo 'Firewall controller ready; kindnet and kube-proxy preserved. No runtime downloads.'
-echo 'LIMITATION: kube-router v2.10.0 exempts node-local ports 30000-32767 and some ICMP traffic from pod policy checks.' >&2
-echo 'API-only runner isolation requires an additional isolation profile; controller readiness is not proof of host isolation.' >&2
+echo 'Network policy and staging protections ready. No runtime downloads.'
+echo 'Each local CI runner must also pass its own verified network startup gate.'
