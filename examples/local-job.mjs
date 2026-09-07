@@ -40,8 +40,10 @@ if(mode==='isolation'){
  ]){const result=await api(method,path,body);assert.equal(result.status,403,`${method} ${path}: ${result.status}`)}
  assert.equal(fs.existsSync('/var/run/docker.sock'),false);
  assert.equal(fs.existsSync('/root/.kube/config'),false);
+ for(const path of ['/run/auth/token','/run/archive','/run/admin','/run/finalizer','/run/secrets/aws'])assert.equal(fs.existsSync(path),false,`${path} unexpectedly mounted`);
  assert.throws(()=>fs.writeFileSync('/opt/guard/escape','x'));
  assert.equal(await connect('1.1.1.1',443),false,'external network reachable');
+ for(const [host,port] of [['db',5432],['minio',9000],['issuer',8443],['fulcio',5555],['rekor',3000]])assert.equal(await connect(host,port),false,`${host}:${port} unexpectedly reachable`);
  // A fixed reachable local canary is supplied as argv by the integration harness.
  if(process.argv[3])assert.equal(await connect(process.argv[3],8080),false,'protected local canary reachable');
  if(process.argv[4]){

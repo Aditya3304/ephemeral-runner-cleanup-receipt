@@ -12,6 +12,7 @@ build() {
   go test -c -trimpath -o .build/db.test ./db
 }
 case "${1:-help}" in
+  hardening-check) python3 scripts/hardening-run.py ;;
   watchdog-build) GOPROXY=off GOSUMDB=off go build -p 2 -trimpath -o .build/watchdog ./cmd/watchdog ;;
   watchdog-install) python3 scripts/watchdog-install.py --service ;;
   watchdog-once) shift; python3 scripts/watchdog-run.py "$@" ;;
@@ -89,6 +90,7 @@ case "${1:-help}" in
   stop) docker compose stop db ;;
   *)
     echo 'Local database foundation (WSL/Linux). No hosted workflows.'
+    echo 'bash dev hardening-check Run the complete local fault and offline acceptance matrix.'
     echo 'bash dev watchdog-build Build the local recovery worker offline.'
     echo 'bash dev watchdog-install Pin this build and enable its WSL user service.'
     echo 'bash dev watchdog-once [--run RUN] Reconcile eligible work; preserve retry budgets.'
