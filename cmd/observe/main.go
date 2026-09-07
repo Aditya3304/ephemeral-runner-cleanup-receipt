@@ -4,6 +4,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -30,6 +31,9 @@ func main() {
 	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		if errors.Is(err, observer.ErrResultLost) {
+			os.Exit(66)
+		}
 		os.Exit(1)
 	}
 }

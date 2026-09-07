@@ -49,8 +49,10 @@ try:
     completed=json.loads(path.read_text())
     assert completed['resource_absent'] and completed['runner_absent']
     assert (path.parent/'job.log').read_text().count('LOCAL_JOB_STARTED wait')==1
-    row=receipt_for(run_id); verification=verify_receipt(row['id'])
-    report={'kind':'hardening-controlplane-outage/v1','checked_at':utc_now(),'run_id':run_id,'receipt_id':row['id'],'first_attempt':{'result':'retry','stage':'collect','error_code':failed['current']['error_code']},'recovered_attempt':2,'command_runs':1,'resources_absent':True,'runner_absent':True,'verdict':row['verdict'],'signature':verification['signature'],'artifacts':verification['artifacts']}
+    row=receipt_for(run_id); assert row['verdict']!='pass'
+    assert row['incident'] is not None and row['incident']['state']=='open'
+    verification=verify_receipt(row['id'])
+    report={'kind':'hardening-controlplane-outage/v1','checked_at':utc_now(),'run_id':run_id,'receipt_id':row['id'],'incident_id':row['incident']['id'],'incident_count':1,'first_attempt':{'result':'retry','stage':'collect','error_code':failed['current']['error_code']},'recovered_attempt':2,'command_runs':1,'resources_absent':True,'runner_absent':True,'verdict':row['verdict'],'signature':verification['signature'],'artifacts':verification['artifacts']}
     (ROOT/'.build/hardening-controlplane-outage.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report,indent=2))
 finally:

@@ -397,12 +397,18 @@ func Read(r Request, mode string, w io.Writer) error {
 	}
 	dir, e := openDirectory(r.Directory())
 	if e != nil {
+		if mode == "result" && errors.Is(e, os.ErrNotExist) {
+			return fmt.Errorf("%w: private result directory is absent", ErrResultLost)
+		}
 		return e
 	}
 	defer dir.Close()
 	if mode == "ready" || mode == "result" {
 		lock, err := openChild(dir, "lock", unix.O_RDWR)
 		if err != nil {
+			if mode == "result" && errors.Is(err, os.ErrNotExist) {
+				return fmt.Errorf("%w: collector lock is absent", ErrResultLost)
+			}
 			return err
 		}
 		defer lock.Close()
@@ -419,6 +425,9 @@ func Read(r Request, mode string, w io.Writer) error {
 			if _, err := os.Lstat(filepath.Join(r.Directory(), "result.json")); errors.Is(err, os.ErrNotExist) {
 				f, err := openChild(dir, "job.log", unix.O_RDONLY)
 				if err != nil {
+					if errors.Is(err, os.ErrNotExist) {
+						return fmt.Errorf("%w: interrupted spool is absent", ErrResultLost)
+					}
 					return err
 				}
 				hash, size, err := digestReader(io.LimitReader(f, MaxLogs+1))

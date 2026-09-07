@@ -16,6 +16,10 @@ var hex64 = regexp.MustCompile(`^[0-9a-f]{64}$`)
 var uid = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
 var podName = regexp.MustCompile(`^job-[a-z0-9]{5}$`)
 
+// ErrResultLost means the detached collector's private state disappeared after
+// it was armed. The observation window cannot be recreated or retried.
+var ErrResultLost = errors.New("collector result irreversibly unavailable")
+
 type Request struct {
 	Run     string `json:"run"`
 	Pod     string `json:"pod"`

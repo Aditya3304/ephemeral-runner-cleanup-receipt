@@ -63,9 +63,18 @@ func collectorCommand(ctx context.Context, r observer.Request, mode string, w io
 	var stderr bytes.Buffer
 	cmd.Stderr = &cappedWriter{&stderr, 2048}
 	if e := cmd.Run(); e != nil {
-		return fmt.Errorf("trusted collector %s: %w: %.2048s", mode, e, stderr.String())
+		return classifyCollectorFailure(mode, e, stderr.String())
 	}
 	return nil
+}
+
+func classifyCollectorFailure(mode string, err error, stderr string) error {
+	wrapped := fmt.Errorf("trusted collector %s: %w: %.2048s", mode, err, stderr)
+	var exit *exec.ExitError
+	if mode == "result" && errors.As(err, &exit) && exit.ExitCode() == 66 {
+		return terminalCollection(wrapped)
+	}
+	return wrapped
 }
 func (c *Coordinator) armCollector(ctx context.Context, l *Ledger, sandbox string) error {
 	r := observer.Request{Run: l.Token, Pod: l.PodName, UID: l.PodUID, Sandbox: sandbox, Binding: collectorBinding(l), Seconds: int(l.TimeoutSeconds) + 300}
@@ -136,6 +145,10 @@ func (c *Coordinator) collectTrusted(ctx context.Context, l *Ledger) error {
 	}
 	var raw bytes.Buffer
 	if e = collectorCommand(ctx, r, "result", &raw); e != nil {
+		var terminal *terminalCollectionError
+		if errors.As(e, &terminal) {
+			l.LogsStatus = "missing"
+		}
 		return e
 	}
 	var result observer.Result

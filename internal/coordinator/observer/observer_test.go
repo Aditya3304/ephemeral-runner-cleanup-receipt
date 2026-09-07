@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -191,5 +193,17 @@ func TestResultNeverPromotesMissingStartOrTermination(t *testing.T) {
 	r.Workspace.Status = "verified"
 	if e := r.Validate(); e == nil {
 		t.Fatal("filesystem observation without stopped guard")
+	}
+}
+
+func TestMissingResultDirectoryIsIrreversible(t *testing.T) {
+	r := requestFixture()
+	r.Run = strings.Repeat("d", 32)
+	if err := os.RemoveAll(r.Directory()); err != nil {
+		t.Fatal(err)
+	}
+	err := Read(r, "result", io.Discard)
+	if !errors.Is(err, ErrResultLost) {
+		t.Fatalf("missing result directory remained retryable: %v", err)
 	}
 }
