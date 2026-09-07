@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/finalizer"
+	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/watchdog"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -228,6 +229,30 @@ func (s *Server) Handler() http.Handler {
 			return
 		}
 		reply(w, 200, map[string]any{"items": items})
+	})
+	r.With(s.auth).Post("/v1/recovery", func(w http.ResponseWriter, r *http.Request) {
+		b, ok := body(w, r)
+		if !ok {
+			return
+		}
+		var a watchdog.Report
+		if strictJSON(b, &a) != nil || a.Identity.Repository != s.Verifier.Repository {
+			fail(w, ErrInvalid)
+			return
+		}
+		if e := s.Store.Recovery(r.Context(), a); e != nil {
+			fail(w, e)
+			return
+		}
+		reply(w, 200, map[string]string{"status": "recorded"})
+	})
+	r.Get("/v1/recovery", func(w http.ResponseWriter, r *http.Request) {
+		items, e := s.Store.Recoveries(r.Context())
+		if e != nil {
+			fail(w, e)
+			return
+		}
+		reply(w, 200, map[string]any{"items": items, "limit": 100})
 	})
 	return r
 }

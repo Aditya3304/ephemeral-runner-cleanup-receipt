@@ -18,6 +18,7 @@ import (
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/database"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/finalizer"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/proof"
+	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/watchdog"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -329,4 +330,67 @@ func TestRealIngestion(t *testing.T) {
 			t.Fatal("database not TLS")
 		}
 	})
+
+	t.Run("watchdog_leases_history_and_verified_completion", func(t *testing.T) {
+		id := pass.Receipt.Identity
+		lease := time.Now().Add(10 * time.Minute)
+		a := watchdog.Report{Identity: id, Number: 1, Stage: "collect", Status: "running", LeaseOwner: watchdog.UUID(), LeaseExpiresAt: &lease}
+		if e := store.Recovery(ctx, a); e != nil {
+			t.Fatal(e)
+		}
+		due := time.Now().Add(time.Minute)
+		a.Status = "retry"
+		a.Stage = "sign"
+		a.ErrorCode = "dependency_unavailable"
+		a.NextRetryAt = &due
+		a.LeaseOwner = ""
+		a.LeaseExpiresAt = nil
+		if e := store.Recovery(ctx, a); e != nil {
+			t.Fatal(e)
+		}
+		if e := store.Recovery(ctx, a); e != nil {
+			t.Fatal("replay", e)
+		}
+		// Reporting uses a distinct origin, so delivery attempt 1 remains intact.
+		var n int
+		if e := store.Pool.QueryRow(ctx, "SELECT count(*) FROM evidence.finalization_attempts WHERE run_id=$1 AND attempt_number=1", id.Run).Scan(&n); e != nil || n != 2 {
+			t.Fatal("origin collision", n, e)
+		}
+		a.Status = "succeeded"
+		a.Stage = "complete"
+		a.ErrorCode = ""
+		a.NextRetryAt = nil
+		a.ReceiptID = watchdog.UUID()
+		if e := store.Recovery(ctx, a); !errors.Is(e, ErrInvalid) {
+			t.Fatal("unverified success accepted", e)
+		}
+		committed, e := store.Ingest(ctx, pass)
+		if e != nil {
+			t.Fatal(e)
+		}
+		a.ReceiptID = committed.ID
+		if e = store.Recovery(ctx, a); e != nil {
+			t.Fatal(e)
+		}
+		a.Status = "running"
+		a.Stage = "collect"
+		a.ReceiptID = ""
+		a.LeaseOwner = watchdog.UUID()
+		a.LeaseExpiresAt = &lease
+		if e = store.Recovery(ctx, a); e != nil {
+			t.Fatal(e)
+		}
+		var state string
+		if e = store.Pool.QueryRow(ctx, "SELECT result FROM evidence.finalization_attempts WHERE run_id=$1 AND origin='watchdog'", id.Run).Scan(&state); e != nil || state != "succeeded" {
+			t.Fatal("stale report downgraded success", state, e)
+		}
+		rows, e := store.Recoveries(ctx)
+		if e != nil || len(rows) != 1 {
+			t.Fatal("recovery query", e)
+		}
+		if e = schema.Migrate(ctx, admin, "down"); e == nil {
+			t.Fatal("rollback discarded recovery history")
+		}
+	})
+
 }

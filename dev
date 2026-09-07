@@ -12,6 +12,11 @@ build() {
   go test -c -trimpath -o .build/db.test ./db
 }
 case "${1:-help}" in
+  watchdog-build) GOPROXY=off GOSUMDB=off go build -p 2 -trimpath -o .build/watchdog ./cmd/watchdog ;;
+  watchdog-install) python3 scripts/watchdog-install.py --service ;;
+  watchdog-once) shift; python3 scripts/watchdog-run.py "$@" ;;
+  watchdog-status) python3 scripts/watchdog-run.py status ;;
+  watchdog-stop) systemctl --user stop cleanup-receipt-watchdog.service ;;
   dashboard-prepare) bash scripts/dashboard-prepare.sh ;;
   dashboard-build) bash scripts/dashboard-build.sh ;;
   dashboard-check) shift; bash scripts/dashboard-test.sh "$@" ;;
@@ -84,6 +89,11 @@ case "${1:-help}" in
   stop) docker compose stop db ;;
   *)
     echo 'Local database foundation (WSL/Linux). No hosted workflows.'
+    echo 'bash dev watchdog-build Build the local recovery worker offline.'
+    echo 'bash dev watchdog-install Pin this build and enable its WSL user service.'
+    echo 'bash dev watchdog-once [--run RUN] Reconcile eligible work; preserve retry budgets.'
+    echo 'bash dev watchdog-status Show durable local recovery records, even if the API is down.'
+    echo 'bash dev watchdog-stop Stop recovery without deleting state or evidence.'
     echo 'bash dev dashboard-prepare Cache pinned UI dependencies and browser for initial setup.'
     echo 'bash dev dashboard-build Build the local dashboard with cached dependencies.'
     echo 'bash dev dashboard-check Check the running dashboard in Chromium.'

@@ -3,19 +3,32 @@ import AxeBuilder from "@axe-core/playwright";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 const artifacts = "../.build/dashboard-artifacts";
 async function loaded(page: Page) {
-  await page.goto("/");
-  await expect(
-    page.getByRole("button", { name: "Open Isolation check receipt" }),
-  ).toBeVisible();
+  await page.goto("/?receipt=9e74651b-0074-474a-b0a5-e422cff23b26");
+  await expect(page.locator(".detail-panel h2")).toHaveText("Isolation check");
   await expect(
     page.getByRole("button", { name: "Verify this receipt", exact: true }),
   ).toBeVisible();
 }
-let receiptCount = 0;
+let receiptCount = 0,
+  incidentCount = 0,
+  attentionCount = 0,
+  partialCount = 0,
+  cancelCount = 0;
 test.beforeAll(async ({ request }) => {
   await mkdir(artifacts, { recursive: true });
   const { items } = await (await request.get("/v1/receipts?limit=100")).json();
-  receiptCount = items.length;
+  receiptCount = Math.min(items.length, 25);
+  incidentCount = (await (await request.get("/v1/incidents?limit=25")).json())
+    .items.length;
+  attentionCount = (
+    await (await request.get("/v1/receipts?limit=25&verdict=fail")).json()
+  ).items.length;
+  partialCount = (
+    await (await request.get("/v1/receipts?limit=25&verdict=partial")).json()
+  ).items.length;
+  cancelCount = (
+    await (await request.get("/v1/receipts?limit=25&q=cancel")).json()
+  ).items.length;
 });
 
 test("real data, local-only assets, visual overview, and genuine verification", async ({
@@ -37,9 +50,6 @@ test("real data, local-only assets, visual overview, and genuine verification", 
   await expect(page.locator(".ledger-table tbody tr")).toHaveCount(
     receiptCount,
   );
-  await page
-    .getByRole("button", { name: "Open Isolation check receipt" })
-    .click();
   await expect(page.locator(".detail-panel h2")).toHaveText("Isolation check");
   await page.screenshot({ path: `${artifacts}/overview.png`, fullPage: true });
   await page
@@ -66,7 +76,12 @@ test("real data, local-only assets, visual overview, and genuine verification", 
 test("incident selection and coverage stay honest", async ({ page }) => {
   await loaded(page);
   await page.getByRole("button", { name: "Incidents", exact: true }).click();
-  await expect(page.locator(".ledger-table tbody tr")).toHaveCount(1);
+  await expect(page.locator(".ledger-table tbody tr")).toHaveCount(
+    incidentCount,
+  );
+  await page.goto(
+    "/?view=incidents&receipt=f3aefeb6-81cf-4cb2-8d67-7836394d6a18",
+  );
   await expect(page.locator(".detail-panel h2")).toHaveText(
     "Interrupted runner",
   );
@@ -95,7 +110,7 @@ test("search, verdict filters, keyboard shortcut, and browser history", async ({
     page.getByRole("textbox", { name: "Search receipts" }),
   ).toBeFocused();
   await page.getByRole("textbox", { name: "Search receipts" }).fill("cancel");
-  await expect(page.locator(".ledger-table tbody tr")).toHaveCount(1);
+  await expect(page.locator(".ledger-table tbody tr")).toHaveCount(cancelCount);
   await expect(page.locator(".detail-panel h2")).toHaveText(
     "Graceful cancellation",
   );
@@ -105,15 +120,22 @@ test("search, verdict filters, keyboard shortcut, and browser history", async ({
     receiptCount,
   );
   await page.getByRole("button", { name: "Attention", exact: true }).click();
-  await expect(page.locator(".ledger-table tbody tr")).toHaveCount(1);
+  await expect(page.locator(".ledger-table tbody tr")).toHaveCount(
+    attentionCount,
+  );
   await page.goBack();
   await expect(page.locator(".ledger-table tbody tr")).toHaveCount(
     receiptCount,
   );
   await page.getByRole("button", { name: "Incomplete", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "No matching receipts" }),
-  ).toBeVisible();
+  if (partialCount === 0)
+    await expect(
+      page.getByRole("heading", { name: "No matching receipts" }),
+    ).toBeVisible();
+  else
+    await expect(page.locator(".ledger-table tbody tr")).toHaveCount(
+      partialCount,
+    );
   await page.getByRole("button", { name: "Clear all", exact: true }).click();
   await expect(page.locator(".ledger-table tbody tr")).toHaveCount(
     receiptCount,
@@ -132,6 +154,24 @@ test("repository, incident, inclusive dates, and filter dialog accessibility", a
     const d = new Date(t);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }, d.toISOString());
+  const bounds = await page.evaluate((day) => {
+    const from = new Date(day + "T00:00:00");
+    const to = new Date(from);
+    to.setDate(to.getDate() + 1);
+    return { from: from.toISOString(), to: to.toISOString() };
+  }, day);
+  const matching = (
+    await (
+      await request.get("/v1/receipts", {
+        params: {
+          limit: "25",
+          repository: "Aditya3304/ephemeral-runner-cleanup-receipt",
+          incident_state: "open",
+          ...bounds,
+        },
+      })
+    ).json()
+  ).items.length;
   await loaded(page);
   await page.getByRole("button", { name: "Filters", exact: true }).click();
   const dialog = page.getByRole("dialog");
@@ -152,7 +192,7 @@ test("repository, incident, inclusive dates, and filter dialog accessibility", a
   await dialog.getByLabel("From", { exact: true }).fill(day);
   await dialog.getByLabel("Through", { exact: true }).fill(day);
   await dialog.getByRole("button", { name: "Apply filters" }).click();
-  await expect(page.locator(".ledger-table tbody tr")).toHaveCount(1);
+  await expect(page.locator(".ledger-table tbody tr")).toHaveCount(matching);
   await expect(page).toHaveURL(/incident_state=open/);
   await page.getByRole("button", { name: /^Filters/ }).click();
   await dialog.getByLabel("From", { exact: true }).fill("2027-01-01");
@@ -292,7 +332,7 @@ test("pagination does not mistake one page for the complete ledger", async ({
   );
   await page.getByRole("button", { name: "Load more", exact: true }).click();
   await expect(page.locator(".ledger-table tbody tr")).toHaveCount(
-    receiptCount,
+    items.length,
   );
   await expect(
     page.getByRole("button", { name: "Load more", exact: true }),
@@ -342,9 +382,7 @@ test("mobile layout, coverage interaction, and reduced motion", async ({
       ),
     )
     .toBe(true);
-  await page
-    .getByRole("button", { name: "Open Interrupted runner receipt" })
-    .click();
+  await page.goto("/?receipt=f3aefeb6-81cf-4cb2-8d67-7836394d6a18");
   await expect(page.locator(".detail-panel h2")).toHaveText(
     "Interrupted runner",
   );

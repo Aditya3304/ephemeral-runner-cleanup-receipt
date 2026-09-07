@@ -1,6 +1,6 @@
 # Ephemeral Runner Cleanup Receipt — local build proposal
 
-Status: approved by the user on September 7, 2026. Milestones a through f are implemented and validated; confirmation is required before g. Seven genuine receipts and one incident are visible in the local dashboard. The repository's docs/milestones.md and docs/dashboard-validation.md record current progress and validation. Proposal wording below preserves the approved design.
+Status: approved by the user on September 7, 2026. Milestones a through g are implemented and validated; confirmation is required before h. Twenty-one genuine receipts and three cleanup incidents are visible in the local dashboard; sixteen incompatible historical records are retained for review. The repository's docs/milestones.md and docs/watchdog-validation.md record current progress and validation. Proposal wording below preserves the approved design.
 
 ## Confirmed direction
 

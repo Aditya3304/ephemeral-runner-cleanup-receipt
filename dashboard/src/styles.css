@@ -2803,3 +2803,125 @@ details summary::-webkit-details-marker {
     opacity: 0.6;
   }
 }
+
+.recovery-panel {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  margin: -10px 0 26px;
+}
+.recovery-panel > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 19px;
+  cursor: pointer;
+  font-size: 11px;
+  list-style: none;
+}
+.recovery-panel > summary::-webkit-details-marker {
+  display: none;
+}
+.recovery-panel > summary > span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.recovery-panel > summary > span:last-child {
+  color: var(--muted);
+  font-size: 10px;
+}
+.recovery-label {
+  font-weight: 500;
+}
+.recovery-content {
+  padding: 0 19px 18px;
+}
+.recovery-content > p,
+.recovery-content > div[role="alert"] {
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--muted);
+  margin: 4px 0 15px;
+}
+.recovery-content ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  max-height: 420px;
+  overflow-y: auto;
+  scrollbar-color: var(--muted) var(--surface);
+  scrollbar-width: thin;
+}
+.recovery-content ul:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 4px;
+}
+.recovery-content li {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  border-top: 1px solid var(--line);
+  padding: 15px 0;
+}
+.recovery-content li > div {
+  flex: 1;
+  min-width: 0;
+}
+.recovery-content strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.recovery-content .mono {
+  display: block;
+  font-size: 9px;
+  margin-top: 5px;
+  color: var(--muted);
+}
+.recovery-content li p,
+.recovery-content time {
+  font-size: 11px;
+  line-height: 1.8;
+  margin-top: 5px;
+  display: block;
+}
+.recovery-symbol {
+  padding-top: 2px;
+  color: var(--orange);
+}
+.recovery-content .succeeded .recovery-symbol {
+  color: var(--green);
+}
+.recovery-status {
+  font-size: 10px;
+  color: var(--orange);
+  white-space: nowrap;
+}
+.recovery-content .text-button {
+  font-size: 11px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+@media (max-width: 700px) {
+  .recovery-panel > summary {
+    align-items: flex-start;
+    padding: 14px;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .recovery-content {
+    padding: 0 14px 15px;
+  }
+  .recovery-content li {
+    flex-wrap: wrap;
+  }
+  .recovery-content li > div {
+    flex-basis: 75%;
+  }
+  .recovery-status,
+  .recovery-content .text-button {
+    margin-left: 30px;
+  }
+}

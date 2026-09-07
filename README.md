@@ -4,20 +4,22 @@ A local, offline-capable cleanup evidence pipeline for disposable Kubernetes CI
 runners. Built with Go, PostgreSQL, a TypeScript guard, a trusted Sigstore finalizer,
 S3-compatible evidence storage and a React dashboard.
 
-**Current milestone: f — AFTER, the interactive evidence dashboard, is complete.**
-Seven genuine receipts are visible through the local API, with one open cleanup
-incident. The newest local Kubernetes run completed cleanup, private keyless
-signing, API ingestion and fresh verification from the dashboard.
+**Current milestone: g — local watchdog recovery is complete.**
+AFTER shows 21 genuine verified receipts and three cleanup incidents. The WSL
+watchdog recovered missing finalizations, an API outage and a crashed coordinator.
+Sixteen incompatible historical development records remain visible for review;
+their frozen evidence has not been rewritten or presented as verified cleanup.
 
 Open [AFTER — evidence desk](http://localhost:8080/) after
 `bash dev dashboard-up`. Explore the five-check coverage map, search and filters,
 incident details, artifact references, timeline, and light/dark appearance.
 Use the supplied Windows `Run-cleanup-dashboard.cmd` shortcut for the same startup.
 
-See the [dashboard guide](docs/dashboard.md) and
-[milestone f validation](docs/dashboard-validation.md). Watchdog recovery, the full
-system fault matrix, and local backup/rehearsal remain pending. No hosted GitHub
-workflows or AWS resources are running.
+Expand **Recovery watch** to inspect recorded retries and open linked receipts.
+The installed service runs while WSL and Docker are available. See the
+[watchdog guide](docs/watchdog.md), [milestone g validation](docs/watchdog-validation.md),
+and [dashboard guide](docs/dashboard.md). The full system fault matrix and local
+backup/rehearsal remain pending. No hosted GitHub workflows or AWS resources run.
 
 On this prepared laptop, run `bash dev ci-up`, `bash dev finalizer-up`, then
 `bash dev finalizer-demo` for passing/failing commands, automatic cleanup,
@@ -88,6 +90,8 @@ independently verifying API without re-signing or rewriting archived evidence.
 - Chi/pgx API with independent signature/artifact verification and durable delivery.
 - AFTER React dashboard: interactive coverage, incidents, search, filters, timeline,
   exact references and explicit fresh verification with fully local assets.
+- Pinned WSL watchdog service: durable retry budgets, process locks, crash recovery,
+  independent finalization/delivery, authenticated recovery metadata and review visibility.
 
 ## Trust and limitations
 

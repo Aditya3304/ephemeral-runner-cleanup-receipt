@@ -72,11 +72,11 @@ func TestSchema(t *testing.T) {
 	exec(t, root, "GRANT CONNECT ON DATABASE "+quoted+" TO proof_api")
 
 	t.Run("fresh_migration_idempotence_down_and_up", func(t *testing.T) {
-		for _, command := range []string{"up", "up", "down", "up"} {
+		for _, command := range []string{"up", "up", "reset", "up"} {
 			if err := db.Migrate(ctx, admin, command); err != nil {
 				t.Fatal(err)
 			}
-			if command == "down" {
+			if command == "reset" {
 				var count int
 				if err := admin.QueryRow("SELECT count(*) FROM information_schema.schemata WHERE schema_name='evidence'").Scan(&count); err != nil {
 					t.Fatal(err)

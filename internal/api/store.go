@@ -237,7 +237,7 @@ func (s *Store) List(ctx context.Context, f Filter, incidents bool) (Page, error
 }
 
 // Attempts here are immutable reports of completed operational failures.
-// Scheduling/leases belong to milestone g. Success is proven by a receipt query.
+// The watchdog schedules recovery separately. Success is proven by a receipt query.
 type Attempt struct {
 	Identity    proof.Identity `json:"identity"`
 	Number      int            `json:"attempt_number"`
@@ -272,7 +272,7 @@ func (s *Store) RecordAttempt(ctx context.Context, a Attempt) (Commit, error) {
  ON CONFLICT ON CONSTRAINT finalization_attempt_identity DO NOTHING RETURNING id::text`, id.Provider, id.Repository, id.Run, id.Attempt, id.Job, a.Number, a.Stage, a.Result, a.ErrorCode, a.NextRetryAt).Scan(&out.ID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		var same bool
-		err = s.Pool.QueryRow(ctx, `SELECT id::text,stage=$7 AND result=$8 AND error_code=$9 FROM evidence.finalization_attempts WHERE provider=$1 AND repository_id=$2 AND run_id=$3 AND run_attempt=$4 AND job_id=$5 AND attempt_number=$6`, id.Provider, id.Repository, id.Run, id.Attempt, id.Job, a.Number, a.Stage, a.Result, a.ErrorCode).Scan(&out.ID, &same)
+		err = s.Pool.QueryRow(ctx, `SELECT id::text,stage=$7 AND result=$8 AND error_code=$9 FROM evidence.finalization_attempts WHERE provider=$1 AND repository_id=$2 AND run_id=$3 AND run_attempt=$4 AND job_id=$5 AND attempt_number=$6 AND origin='delivery'`, id.Provider, id.Repository, id.Run, id.Attempt, id.Job, a.Number, a.Stage, a.Result, a.ErrorCode).Scan(&out.ID, &same)
 		if err == nil && !same {
 			return out, ErrConflict
 		}

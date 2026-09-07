@@ -11,12 +11,30 @@ Each completed milestone is demonstrated and requires confirmation before the ne
 | c: guard/coordinator | Complete; milestone d approved | Local job lifecycle, durable coordinator, isolated runners and disabled GitHub adapter |
 | d: signing/finalizer | Complete; milestone e approved | Independent observations, private keyless signing, protected archive and verified canonical receipts |
 | e: API | Complete; milestone f approved | Chi/pgx verification, sanitization, atomic receipts/incidents, queries and durable delivery |
-| f: dashboard | Complete; awaiting approval for g | AFTER: React/Vite/Tailwind/TanStack, interactive coverage, search/filters/incidents and fresh verification |
-| g: watchdog | Not started | Missing-finalization recovery and incidents |
+| f: dashboard | Complete; milestone g approved | AFTER: React/Vite/Tailwind/TanStack, interactive coverage, search/filters/incidents and fresh verification |
+| g: watchdog | Complete; awaiting approval for h | Persistent WSL recovery, bounded retries, crash/outage reconciliation and recovery visibility |
 | h: hardening | Not started | End-to-end fault and offline-execution matrix |
 | i: local deployment | Not started | Packaging, backup and rehearsals; AWS remains excluded |
 
-## Milestone f validation and remaining work
+## Milestone g validation and remaining work
+
+The installed WSL user service recovered missing finalizations, a real API outage
+and a killed coordinator without rerunning its job. The full local ledger sweep
+accounts for 37 runs: 21 independently verified receipts (18 pass, two fail, one
+partial), and 16 incompatible historical input records retained for review.
+The three non-passing receipts have three paired cleanup incidents. Operational
+recovery failures are shown separately from signed cleanup verdicts.
+
+See [watchdog-validation.md](watchdog-validation.md) and [watchdog.md](watchdog.md).
+The dashboard includes recovery states, retained failure reasons and navigation
+to verified receipts. The service is installed by content digest and preserves
+retry budgets across restarts. All runtime components remain on this laptop.
+
+The next gate is **h: hardening**. The full system fault/offline acceptance matrix,
+local backup and rehearsal remain pending. Hosted GitHub, public Sigstore and
+AWS remain excluded. User confirmation is required before milestone h.
+
+## Historical milestone f validation (at its completion)
 
 AFTER is running at http://localhost:8080/ with seven genuine receipts and one
 open incident. A fresh Kubernetes run was cleaned, independently observed,
@@ -30,9 +48,9 @@ exact artifact references and recorded timeline; summary counts describe only th
 loaded view. All UI assets are local. Analytics charts, live polling and incident
 editing remain outside the approved v1 design.
 
-The next gate is **g: watchdog**. Automatic missing-finalization recovery,
-full-system fault/offline acceptance, backup and rehearsal remain pending.
-Hosted GitHub, public Sigstore and AWS remain excluded. Approval is required before g.
+At that milestone, automatic recovery, full-system fault/offline acceptance,
+backup and rehearsal remained pending. Milestone g has since been approved and
+completed as recorded above.
 
 ## Historical milestone e validation and deferrals (at its completion)
 

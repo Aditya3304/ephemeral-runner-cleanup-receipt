@@ -47,6 +47,7 @@ import {
 } from "./data";
 import { Badge, Empty, Footer, Mark, tabKeys } from "./shared";
 import { Detail } from "./Detail";
+import { RecoveryPanel } from "./Recovery";
 
 function FiltersDialog({
   filters,
@@ -550,6 +551,7 @@ export default function App() {
     navigate({ ...emptyFilters, view: filters.view });
   };
   const refresh = () => {
+    void client.invalidateQueries({ queryKey: ["recovery"] });
     void client.invalidateQueries({ queryKey: ["receipts"] });
     void client.invalidateQueries({ queryKey: ["receipt"] });
     void client.invalidateQueries({ queryKey: ["ready"] });
@@ -806,6 +808,7 @@ export default function App() {
                   </span>
                 </div>
               </section>
+              <RecoveryPanel onSelect={select} />
               <div className="section-heading">
                 <h2>
                   {filters.view === "incidents"

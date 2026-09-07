@@ -19,6 +19,7 @@ func TestBoundaryBeforeDependencies(t *testing.T) {
 		{name: "cross origin", method: "GET", path: "/healthz", host: "localhost:8080", origin: "http://evil.example", want: 403},
 		{name: "ingest unauthorized", method: "POST", path: "/v1/receipts", host: "localhost:8080", want: 401},
 		{name: "attempt unauthorized", method: "POST", path: "/v1/attempts", host: "api:8080", want: 401},
+		{name: "recovery unauthorized", method: "POST", path: "/v1/recovery", host: "localhost:8080", want: 401},
 		{name: "oversized", method: "POST", path: "/v1/receipts", host: "api:8080", token: strings.Repeat("a", 64), body: strings.Repeat("x", 17000), want: 413},
 		{name: "malformed", method: "POST", path: "/v1/receipts", host: "api:8080", token: strings.Repeat("a", 64), body: `{}`, want: 422},
 	} {
