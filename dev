@@ -12,6 +12,12 @@ build() {
   go test -c -trimpath -o .build/db.test ./db
 }
 case "${1:-help}" in
+  release-up) bash scripts/release-up.sh ;;
+  release-stop) bash scripts/release-stop.sh ;;
+  release-status) python3 scripts/release-status.py ;;
+  release-backup) shift; python3 scripts/metadata-backup.py "${1:-create}" ;;
+  release-rehearsal) shift; python3 scripts/release-rehearsal.py "$@" ;;
+  release-package) shift; python3 scripts/release-package.py "${1:-verify}" ;;
   hardening-check) python3 scripts/hardening-run.py ;;
   watchdog-build) GOPROXY=off GOSUMDB=off go build -p 2 -trimpath -o .build/watchdog ./cmd/watchdog ;;
   watchdog-install) python3 scripts/watchdog-install.py --service ;;
@@ -90,6 +96,12 @@ case "${1:-help}" in
   stop) docker compose stop db ;;
   *)
     echo 'Local database foundation (WSL/Linux). No hosted workflows.'
+    echo 'bash dev release-up Start the complete prepared local release without downloads.'
+    echo 'bash dev release-status Verify every local service and a genuine archived receipt.'
+    echo 'bash dev release-stop Stop the release while preserving every persistent volume.'
+    echo 'bash dev release-backup [create|verify] Create or restore-check the metadata backup.'
+    echo 'bash dev release-rehearsal --number N Run a stopped-to-verified full rehearsal.'
+    echo 'bash dev release-package [create|verify] Build or verify the tagged release dossier.'
     echo 'bash dev hardening-check Run the complete local fault and offline acceptance matrix.'
     echo 'bash dev watchdog-build Build the local recovery worker offline.'
     echo 'bash dev watchdog-install Pin this build and enable its WSL user service.'
