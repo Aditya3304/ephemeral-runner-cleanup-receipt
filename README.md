@@ -4,9 +4,10 @@ A local, offline-capable cleanup evidence pipeline for disposable Kubernetes CI
 runners. Built with Go, PostgreSQL, a TypeScript guard, a trusted Sigstore finalizer,
 S3-compatible evidence storage and a React dashboard.
 
-**Current milestone: g — local watchdog recovery is complete.**
-AFTER shows 21 genuine verified receipts and three cleanup incidents. The WSL
-watchdog recovered missing finalizations, an API outage and a crashed coordinator.
+**Current milestone: h — the complete local hardening matrix passed.**
+AFTER shows 33 genuine verified receipts and seven cleanup incidents. The WSL
+watchdog recovered missing finalizations and real Kubernetes, MinIO, signing, API,
+and PostgreSQL outages without replaying a job command or duplicating a receipt.
 Sixteen incompatible historical development records remain visible for review;
 their frozen evidence has not been rewritten or presented as verified cleanup.
 
@@ -18,8 +19,9 @@ Use the supplied Windows `Run-cleanup-dashboard.cmd` shortcut for the same start
 Expand **Recovery watch** to inspect recorded retries and open linked receipts.
 The installed service runs while WSL and Docker are available. See the
 [watchdog guide](docs/watchdog.md), [milestone g validation](docs/watchdog-validation.md),
-and [dashboard guide](docs/dashboard.md). The full system fault matrix and local
-backup/rehearsal remain pending. No hosted GitHub workflows or AWS resources run.
+[milestone h validation](docs/hardening-validation.md), and
+[dashboard guide](docs/dashboard.md). Local packaging, backup, and rehearsal are
+the remaining milestone. No hosted GitHub workflows or AWS resources run.
 
 On this prepared laptop, run `bash dev ci-up`, `bash dev finalizer-up`, then
 `bash dev finalizer-demo` for passing/failing commands, automatic cleanup,
@@ -92,6 +94,8 @@ independently verifying API without re-signing or rewriting archived evidence.
   exact references and explicit fresh verification with fully local assets.
 - Pinned WSL watchdog service: durable retry budgets, process locks, crash recovery,
   independent finalization/delivery, authenticated recovery metadata and review visibility.
+- Reproducible sixteen-group hardening matrix covering real service faults, trust
+  rejection, atomic deduplication, cleanup safety, offline boundaries, and browser behavior.
 
 ## Trust and limitations
 

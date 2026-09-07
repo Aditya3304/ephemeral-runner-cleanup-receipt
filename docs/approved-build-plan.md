@@ -1,6 +1,6 @@
 # Ephemeral Runner Cleanup Receipt — local build proposal
 
-Status: approved by the user on September 7, 2026. Milestones a through g are implemented and validated; confirmation is required before h. Twenty-one genuine receipts and three cleanup incidents are visible in the local dashboard; sixteen incompatible historical records are retained for review. The repository's docs/milestones.md and docs/watchdog-validation.md record current progress and validation. Proposal wording below preserves the approved design.
+Status: approved by the user on September 7, 2026. Milestones a through h are implemented and validated; confirmation is required before i. Thirty-three genuine receipts and seven cleanup incidents are visible in the local dashboard; sixteen incompatible historical records are retained for review. The repository's docs/milestones.md and docs/hardening-validation.md record current progress and validation. Proposal wording below preserves the approved design.
 
 ## Confirmed direction
 
@@ -114,34 +114,34 @@ At every gate, report what works, what was tested, remaining PDF requirements, a
 
 Checked boxes have saved milestone evidence. Unchecked boxes remain final system acceptance gates, including scenarios with earlier component-level coverage. Checks below use the approved local CI and storage equivalents. Original GitHub/AWS-specific gates remain deferred and are not marked complete from local tests.
 
-- [ ] Successful test job invokes cleanup and produces an honest cleanup verdict.
-- [ ] Failed test job also invokes cleanup.
-- [ ] Namespace, service account, and supported tracked volumes are confirmed absent.
-- [ ] Workspace verification detects no residual paths; deliberately left paths prevent success.
-- [ ] Downloaded archived logs match the signed receipt's SHA-256 digest and cover the complete locally collected job log; gaps prevent success.
+- [x] Successful test job invokes cleanup and produces an honest cleanup verdict (milestone h).
+- [x] Failed test job also invokes cleanup (milestone h).
+- [x] Namespace, service account, and supported tracked volumes are confirmed absent (milestone h).
+- [x] Workspace verification detects no residual paths; deliberately left paths prevent success (milestone h).
+- [x] Downloaded archived logs match the signed receipt's SHA-256 digest and cover the complete locally collected job log; gaps prevent success (milestone h).
 - [x] CLI verification and dashboard/API verification both succeed for the same genuine receipt (milestone f).
-- [ ] Duplicate and concurrent finalizations produce one receipt and no duplicate incident.
-- [ ] Tampered receipt, modified evidence, invalid bundle, wrong issuer and wrong signer are rejected before receipt insertion.
-- [ ] Database failure preserves archived objects and schedules recovery; recovery succeeds without duplicates.
-- [ ] Object-store failure prevents a passing receipt and leaves a visible retry/failure path.
-- [ ] Each cleanup failure creates one actionable tracked incident.
+- [x] Duplicate and concurrent finalizations produce one receipt and no duplicate incident (milestone h).
+- [x] Tampered receipt, modified evidence, invalid bundle, wrong issuer and wrong signer are rejected before receipt insertion (milestone h).
+- [x] Database failure preserves archived objects and schedules recovery; recovery succeeds without duplicates (milestone h).
+- [x] Object-store failure prevents a passing receipt and leaves a visible retry/failure path (milestone h).
+- [x] Each cleanup failure creates one actionable tracked incident (milestone h).
 - [x] Dashboard filters work for repository, verdict, date and incident state (milestone f).
 
 Additional tests required by the PDF's trust rules and hardening phase:
 
-- [ ] Graceful cancellation attempts cleanup; abrupt runner deletion or skipped post is discovered by the watchdog.
-- [ ] Deletion timeout, inaccessible Kubernetes API and unobservable runner disposal never become `pass`.
-- [ ] An unrelated resource and all host workspaces survive cleanup tests unchanged.
-- [ ] A resource ownership mismatch prevents unsafe deletion.
-- [ ] The trusted finalizer never checks out or executes PR-controlled code or treats an evidence file as executable.
-- [ ] Job evidence identity, schema, size, artifact name, run attempt and job association are validated.
-- [ ] A job runner cannot obtain archive/admin credentials, write database metadata, invoke a trusted signer, or access host credentials.
-- [ ] Receipt plus incident insertion is atomic, including a forced rollback test.
-- [ ] Archived objects are encrypted and versioned; protected versions resist overwrite/deletion using service credentials.
-- [ ] Missing evidence remains explicit; signing and log-download outages produce accurate attempt/incident state.
-- [ ] Watchdog recovery survives laptop/service restart and does not duplicate unresolved incidents.
-- [ ] A complete run starts, cleans, signs, archives and verifies with external network access blocked and no runtime downloads.
-- [ ] No workflow depends on a paid service or enables metered usage that could violate the zero-spend requirement.
+- [x] Graceful cancellation attempts cleanup; abrupt runner deletion or skipped post is discovered by the watchdog (milestone h).
+- [x] Deletion timeout, inaccessible Kubernetes API and unobservable runner disposal never become `pass` (milestone h).
+- [x] An unrelated resource and all host workspaces survive cleanup tests unchanged (milestone h).
+- [x] A resource ownership mismatch prevents unsafe deletion (milestone h).
+- [x] The trusted finalizer never checks out or executes PR-controlled code or treats an evidence file as executable (milestone h).
+- [x] Job evidence identity, schema, size, artifact name, run attempt and job association are validated (milestone h).
+- [x] A job runner cannot obtain archive/admin credentials, write database metadata, invoke a trusted signer, or access host credentials (milestone h).
+- [x] Receipt plus incident insertion is atomic, including a forced rollback test (milestone h).
+- [x] Archived objects are encrypted and versioned; protected versions resist overwrite/deletion using service credentials (milestone h).
+- [x] Missing evidence remains explicit; signing and log-download outages produce accurate attempt/incident state (milestone h).
+- [x] Watchdog recovery survives laptop/service restart and does not duplicate unresolved incidents (milestones g and h).
+- [x] A complete run starts, cleans, signs, archives and verifies with external network access blocked and no runtime downloads (milestone h).
+- [x] No workflow depends on a paid service or enables metered usage that could violate the zero-spend requirement (milestone h).
 - [ ] A tagged local release supports two rehearsals, sample signed receipts, a known-good database backup, and a backup demo recording.
 
 Definition of success for the proposed offline substitution: a complete real local CI run is visible in the dashboard, its keyless signature verifies against the expected local finalizer identity and pinned private Sigstore trust, logs/evidence are retained in the local S3-compatible archive with verified digests and storage protections, observable cleanup absence is confirmed, and failures generate one actionable incident. The entire demonstration works with internet access blocked.

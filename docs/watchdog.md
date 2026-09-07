@@ -122,6 +122,6 @@ No public Sigstore, hosted GitHub job or AWS service is used. Recovery exhaustio
 is shown as an operational issue; cleanup incidents are created only from verified
 failed or partial receipts through the existing ingestion transaction.
 
-The complete fault-injection and externally blocked acceptance matrix is milestone
-h. Local backup, startup packaging hardening and rehearsal are milestone i.
-Neither is claimed complete by these recovery-specific checks.
+Milestone h has since completed the fault-injection and externally blocked
+acceptance matrix; see [hardening-validation.md](hardening-validation.md). Local
+backup, startup packaging and rehearsal remain milestone i.

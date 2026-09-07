@@ -12,11 +12,31 @@ Each completed milestone is demonstrated and requires confirmation before the ne
 | d: signing/finalizer | Complete; milestone e approved | Independent observations, private keyless signing, protected archive and verified canonical receipts |
 | e: API | Complete; milestone f approved | Chi/pgx verification, sanitization, atomic receipts/incidents, queries and durable delivery |
 | f: dashboard | Complete; milestone g approved | AFTER: React/Vite/Tailwind/TanStack, interactive coverage, search/filters/incidents and fresh verification |
-| g: watchdog | Complete; awaiting approval for h | Persistent WSL recovery, bounded retries, crash/outage reconciliation and recovery visibility |
-| h: hardening | Not started | End-to-end fault and offline-execution matrix |
+| g: watchdog | Complete; milestone h approved | Persistent WSL recovery, bounded retries, crash/outage reconciliation and recovery visibility |
+| h: hardening | Complete; awaiting approval for i | End-to-end fault, trust, service-outage, offline-execution and browser matrix |
 | i: local deployment | Not started | Packaging, backup and rehearsals; AWS remains excluded |
 
-## Milestone g validation and remaining work
+## Milestone h validation and remaining work
+
+All sixteen local hardening groups passed. Six fresh lifecycle cases produced
+signed, archived, independently verified receipts; the real MinIO, signing issuer,
+PostgreSQL, archive-read, and Kubernetes control-plane outages recovered without
+duplicate receipts or job command replay. Tampering, identity mismatch, unsafe
+ownership, residue, missing evidence, log gaps, restricted credentials and forced
+database rollback all stayed fail-closed. All 17 dashboard browser checks passed.
+
+The matrix found and fixed one real defect: loss of the node collector's private
+result directory was endlessly retryable. The repaired coordinator now distinguishes
+that irreversible gap from a temporary outage, disposes only UID-bound resources,
+and issues a signed partial receipt with one incident. See
+[hardening-validation.md](hardening-validation.md).
+
+The local ledger now contains 33 verified receipts: 26 pass, three fail and four
+partial, with seven paired incidents. The next gate is **i: local deployment**:
+startup packaging, a tagged release, two rehearsals, backup/restore, retained sample
+evidence and a demo recording. User confirmation is required before milestone i.
+
+## Historical milestone g validation
 
 The installed WSL user service recovered missing finalizations, a real API outage
 and a killed coordinator without rerunning its job. The full local ledger sweep
@@ -30,9 +50,9 @@ The dashboard includes recovery states, retained failure reasons and navigation
 to verified receipts. The service is installed by content digest and preserves
 retry budgets across restarts. All runtime components remain on this laptop.
 
-The next gate is **h: hardening**. The full system fault/offline acceptance matrix,
-local backup and rehearsal remain pending. Hosted GitHub, public Sigstore and
-AWS remain excluded. User confirmation is required before milestone h.
+Milestone h has since completed the full system fault/offline acceptance matrix.
+Local packaging, backup and rehearsal remain milestone i. Hosted GitHub, public
+Sigstore and AWS remain excluded.
 
 ## Historical milestone f validation (at its completion)
 

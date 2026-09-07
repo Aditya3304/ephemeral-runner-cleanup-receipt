@@ -125,10 +125,10 @@ The local guide is [watchdog.md](watchdog.md).
 
 ## Remaining gate
 
-Milestone **h** still requires user confirmation: the full end-to-end cancellation,
-deletion, signature-tampering, duplicate-delivery, DB/S3-failure and externally
-blocked execution matrix. Some individual faults have already been exercised in
-earlier milestones; this document does not claim the complete matrix is finished.
+At the milestone g gate, milestone **h** still required the full end-to-end
+cancellation, deletion, signature-tampering, duplicate-delivery, DB/S3-failure
+and externally blocked execution matrix. That matrix has since passed; see
+[hardening-validation.md](hardening-validation.md).
 
 Milestone **i** covers local packaging, backup and rehearsal. AWS/Terraform cloud
 deployment, hosted GitHub Actions and public signing services remain excluded by

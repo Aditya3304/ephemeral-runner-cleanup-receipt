@@ -112,7 +112,7 @@ cases use browser request interception; they never insert fabricated production
 records. Screenshots and JSON results go under ignored `.build/`.
 
 Read [dashboard-validation.md](dashboard-validation.md) for the executed checks.
-Watchdog scheduling/leases and the complete fault-injection matrix are later
-milestones. Local backup/rehearsal and a full internet-blocked end-to-end acceptance
-run remain pending. Hosted GitHub CI, public Sigstore and AWS deployment remain
-excluded by the approved local scope.
+Watchdog scheduling/leases and the complete fault-injection matrix are now
+implemented and validated. Local backup, packaging and rehearsal remain milestone
+i. Hosted GitHub CI, public Sigstore and AWS deployment remain excluded by the
+approved local scope.
