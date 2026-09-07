@@ -78,7 +78,7 @@ func run() error {
 	}
 	fmt.Printf("PostgreSQL %s | TLS=%t (%s, verify-full) | Goose schema=%d\n", version, ssl, tlsVersion, schema)
 	fmt.Printf("Stored receipts=%d | incidents=%d | finalization attempts=%d\n", receipts, incidents, attempts)
-	fmt.Println("Milestone a foundation only. Cleanup, signing, ingestion API and dashboard are not implemented yet.")
+	fmt.Println("This command reports database state. Signed receipt files are managed separately.")
 	return nil
 }
 

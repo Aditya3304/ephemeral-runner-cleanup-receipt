@@ -4,10 +4,18 @@ A local, offline-capable cleanup evidence pipeline for disposable Kubernetes CI
 runners. Built with Go, PostgreSQL, a TypeScript guard, a trusted Sigstore finalizer,
 S3-compatible evidence storage and a React dashboard.
 
-**Current milestone: d — trusted finalizer and private local signing in progress.**
-PostgreSQL, cleanup CLI, Node 24 guard and local coordinator are implemented.
-Offline Cosign verification works; the private signing service, trusted finalizer,
-API and dashboard remain pending. No GitHub workflows or AWS resources are running.
+**Current milestone: d — trusted finalizer, protected archive and private signing complete.**
+PostgreSQL, cleanup CLI, Node 24 guard, local coordinator, independent observer,
+private Sigstore and MinIO archive work locally. Six real lifecycle scenarios now
+produce verified signed cleanup receipts. API ingestion, dashboard and watchdog
+remain pending. No hosted GitHub workflows or AWS resources are running.
+
+On this prepared laptop, run `bash dev ci-up`, `bash dev finalizer-up`, then
+`bash dev finalizer-demo` for passing/failing commands, automatic cleanup,
+protected archival, keyless signing and independent verification. See the
+[milestone d validation report](docs/finalizer-validation.md),
+[finalizer guide](docs/finalizer.md), [archive guide](docs/archive.md), and
+[private signing guide](infra/sigstore/README.md). Milestone e awaits confirmation.
 
 For the CLI, run `bash dev cli-demo` after `bash dev cli-prepare` and
 `bash dev kind-up`. See the [CLI guide](docs/cli.md) and
@@ -16,9 +24,10 @@ For the CLI, run `bash dev cli-demo` after `bash dev cli-prepare` and
 For automatic job cleanup, see the [local CI guide](docs/local-ci.md) and
 [guard contract](docs/guard.md). `bash dev ci-demo` runs a passing and a failing
 local job after one-time `bash dev ci-prepare` setup. Both should invoke cleanup;
-evidence remains unsigned and partial until trusted finalization is implemented.
+this guard-only demo produces unsigned preliminary evidence. Use
+`bash dev finalizer-demo` for the complete signed-receipt path.
 The [milestone c validation record](docs/guard-validation.md) records all six live
-scenarios and the remaining limitations. Milestone d is now approved and in progress.
+scenarios and limitations at that historical milestone.
 
 ## Run the foundation
 
@@ -41,8 +50,8 @@ After `prepare`, `up`, `check`, `demo` and `status` use local assets. Compose ha
 
 `demo` is a schema demonstration, not cleanup proof: it inserts a synthetic failure
 and paired incident in one transaction, checks the constraints, then rolls both
-back. No synthetic signed receipts are persisted. The later offline end-to-end
-demo must produce actual signatures from private Sigstore services.
+back. No synthetic signed receipts are persisted. `finalizer-demo` produces real
+signatures and archived receipts; API/database ingestion is the next milestone.
 
 ## What exists
 
@@ -58,10 +67,14 @@ demo must produce actual signatures from private Sigstore services.
 - Go/Cobra/client-go `proofctl`: begin, inventory, cleanup, receipt and verify.
 - Dedicated kind cluster with UID-bound cleanup, safe filesystem deletion and
   explicit partial/failed preliminary evidence.
-- Pinned Cosign and genuine upstream offline bundle tests; private signing is pending.
+- Pinned Cosign, genuine offline bundle checks and private keyless signing services.
 - Node 24 guard main/post, local staging and a durable Go CI coordinator.
 - Restricted runners with a verified network startup gate, resource quotas and
   protected staging metadata; cancellation and restart recovery.
+- Independent stopped-runner filesystem inspection and complete-log observation,
+  with atomic readiness publication and honest missing/failed coverage.
+- An isolated finalizer, versioned/encrypted MinIO archive with COMPLIANCE retention,
+  durable retry/replay handling, and real private Sigstore receipt verification.
 
 ## Trust and limitations
 

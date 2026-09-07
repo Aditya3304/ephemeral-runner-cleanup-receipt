@@ -60,8 +60,9 @@ private bounded `/tmp`. Its mounts are the read-only coordinator root `/input`,
 read-only operator configuration, public trust and named secret volumes, and its
 own writable state/output volumes. It has no checkout, job workspace, Docker
 socket, Kubernetes credentials, shell or host signing credentials. Approved
-binaries are built into the image. Main owns image construction and launch scripts;
-this package does not start containers or execute job commands. Mount and network
+binaries are built into the image. Operator-controlled scripts build and launch
+this isolated image; the finalizer package does not start containers or execute
+job commands. Mount and network
 isolation require the integration tests; receipt validation cannot prove them.
 
 ### Coordinator boundary
@@ -230,8 +231,8 @@ UID and revision mismatches, missing/invalid evidence, snapshot/bundle/archive
 tampering, replay conflicts, backoff/exhaustion, archive/sign/verify recovery,
 coordinator publication readiness, and recovery at the sixth-attempt publication
 boundary. Boundary doubles in unit tests are explicitly test-only and prove no
-Sigstore or storage-service behavior. Main's real private Sigstore/MinIO/container
-end-to-end tests are required to claim milestone-d integration.
+Sigstore or storage-service behavior. The real private Sigstore/MinIO/container
+end-to-end tests passed; see [the validation report](finalizer-validation.md).
 
 Run focused tests with cached dependencies in the Linux development environment:
 

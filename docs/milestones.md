@@ -9,14 +9,29 @@ Each completed milestone is demonstrated and requires confirmation before the ne
 | a: foundation | Complete; milestone b approved | Repository, schema/migrations, TLS, restricted database roles and repeatable local commands |
 | b: cleanup CLI | Complete; milestone c approved | Cobra/client-go commands, real kind cleanup, canonical preliminary evidence and offline Sigstore verification |
 | c: guard/coordinator | Complete; milestone d approved | Local job lifecycle, durable coordinator, isolated runners and disabled GitHub adapter |
-| d: signing/finalizer | In progress | Local identity/Sigstore, trusted archival, canonical receipt |
+| d: signing/finalizer | Complete; awaiting approval for e | Independent observations, private keyless signing, protected archive and verified canonical receipts |
 | e: API | Not started | Chi/pgx verification, sanitization, transactional ingestion and queries |
 | f: dashboard | Not started | React/Vite/Tailwind/TanStack search/detail/incident UI |
 | g: watchdog | Not started | Missing-finalization recovery and incidents |
 | h: hardening | Not started | End-to-end fault and offline-execution matrix |
 | i: local deployment | Not started | Packaging, backup and rehearsals; AWS remains excluded |
 
-## Milestone c validation and remaining work
+## Milestone d validation and remaining work
+
+Six real jobs completed cleanup, trusted observation, encrypted/versioned archive,
+private keyless signing, network-disabled CLI verification and independent object
+readback. Five have signed passing cleanup verdicts; abrupt termination has a
+signed failure recording residual files. Replayed finalization retained the same
+receipt/bundle versions. See [finalizer-validation.md](finalizer-validation.md)
+for exact identities, hashes, test results and limits.
+
+The private signing and archive services run on this laptop with no public runtime
+dependencies or paid resources. API ingestion and incident transactions, React
+dashboard, watchdog, full system fault matrix, and local backup/rehearsal remain
+pending. No application receipt has yet been written to PostgreSQL. Hosted GitHub
+and AWS remain outside the approved scope. Confirmation is required before e.
+
+## Historical milestone c validation and deferrals (at its completion)
 
 All six live lifecycle scenarios passed: success, command failure, cancellation,
 missing post after abrupt runner termination, coordinator restart and isolation.

@@ -1,6 +1,6 @@
 # Ephemeral Runner Cleanup Receipt — local build proposal
 
-Status: approved by the user on September 7, 2026. Milestones a, b and c are implemented and validated; the user approved d, which is now in progress. Wording describing proposals below records the approved design; current implementation status is maintained in milestones.md.
+Status: approved by the user on September 7, 2026. Milestones a through d are implemented and validated; confirmation is required before e. Wording describing proposals below records the approved design; current implementation status is maintained in milestones.md and finalizer-validation.md.
 
 ## Confirmed direction
 
