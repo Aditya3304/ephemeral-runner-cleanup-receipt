@@ -1,0 +1,99 @@
+name: cleanup-receipt-archive
+x-bounded: &bounded
+  restart: unless-stopped
+  pull_policy: never
+  cpus: 0.5
+  pids_limit: 128
+  logging:
+    driver: json-file
+    options: {max-size: 5m, max-file: '2'}
+  networks: [archive]
+services:
+  bootstrap:
+    <<: *bounded
+    image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+    restart: 'no'
+    mem_limit: 128m
+    networks: [archive]
+    entrypoint: [bash, /bootstrap.sh]
+    volumes:
+      - ./infra/archive/bootstrap.sh:/bootstrap.sh:ro
+      - admin:/secrets/admin
+      - tls:/secrets/tls
+      - kes_config:/secrets/kes
+      - finalizer:/secrets/finalizer
+      - verifier:/secrets/verifier
+      - public:/secrets/public
+  kes:
+    <<: *bounded
+    image: quay.io/minio/kes@sha256:bb97b121b03b0acd04eecea63a5909ec2e56eab1a48e0cc418036b67502a64b0
+    mem_limit: 128m
+    command: [server, --config=/secrets/kes/config.yaml]
+    depends_on:
+      bootstrap: {condition: service_completed_successfully}
+    volumes:
+      - kes_config:/secrets/kes:ro
+      - kms_keys:/keys
+  minio:
+    <<: *bounded
+    image: quay.io/minio/minio@sha256:a1ea29fa28355559ef137d71fc570e508a214ec84ff8083e39bc5428980b015e
+    mem_limit: 768m
+    command: [server, /data, --certs-dir, /secrets/tls, --console-address, ':9001']
+    environment:
+      MINIO_ROOT_USER_FILE: /secrets/admin/access-key
+      MINIO_ROOT_PASSWORD_FILE: /secrets/admin/secret-key
+      MINIO_KMS_KES_ENDPOINT: https://kes:7373
+      MINIO_KMS_KES_KEY_NAME: archive-key
+      MINIO_KMS_KES_KEY_FILE: /secrets/tls/kes-client.key
+      MINIO_KMS_KES_CERT_FILE: /secrets/tls/kes-client.crt
+      MINIO_KMS_KES_CAPATH: /secrets/tls/CAs/ca.crt
+      MINIO_BROWSER: 'off'
+      MINIO_UPDATE: 'off'
+    depends_on:
+      kes: {condition: service_started}
+    volumes:
+      - data:/data
+      - admin:/secrets/admin:ro
+      - tls:/secrets/tls:ro
+  provision:
+    <<: *bounded
+    image: quay.io/minio/mc@sha256:aead63c77f9db9107f1696fb08ecb0faeda23729cde94b0f663edf4fe09728e3
+    restart: 'no'
+    mem_limit: 128m
+    entrypoint: [/bin/sh, /provision.sh]
+    depends_on:
+      minio: {condition: service_started}
+    volumes:
+      - ./infra/archive/provision.sh:/provision.sh:ro
+      - ./infra/archive/policies:/policies:ro
+      - admin:/secrets/admin:ro
+      - finalizer:/secrets/finalizer:ro
+      - verifier:/secrets/verifier:ro
+    tmpfs: [/tmp]
+  test:
+    <<: *bounded
+    profiles: [test]
+    image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+    restart: 'no'
+    mem_limit: 256m
+    entrypoint: [/work/archive.test, -test.v]
+    environment:
+      ARCHIVE_INTEGRATION: '1'
+    volumes:
+      - ./infra/archive/work:/work:ro
+      - finalizer:/secrets/finalizer:ro
+      - verifier:/secrets/verifier:ro
+      - admin:/secrets/admin:ro
+networks:
+  archive:
+    name: cleanup-receipt-archive
+    internal: true
+volumes:
+  admin:
+  tls:
+  kes_config:
+  kms_keys:
+  finalizer:
+  verifier:
+  data:
+  public:

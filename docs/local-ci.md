@@ -60,10 +60,19 @@ or package installation occurs inside the runner.
    staging ConfigMap in the runner namespace. The coordinator retrieves bounded
    JSON and validates canonical form, identity, attempt, namespace UID, chronology,
    permitted references and job-only provenance. A conflicting replay is rejected.
-6. The coordinator persists accepted **untrusted** evidence and a bounded log
-   snapshot before deleting the runner. Transient collection errors retain their
-   source for a later `collect`. Privileged deletion uses the ledger's UIDs, never
-   namespace names or references supplied in staged evidence.
+6. Before releasing the init gate, the coordinator arms a detached trusted
+   collector in the fixed kind node. It watches the pinned guard CRI log directory
+   from before first file creation through observed runtime termination and log
+   writer close. It persists at most 100 MiB of exact raw CRI records outside the
+   runner; rotation, truncation, replacement, watch loss, missing start/end proof,
+   and limits prevent complete coverage. The helper survives coordinator restart.
+7. After the guard stops and before Pod deletion, the helper independently checks
+   the pinned emptyDir workspace and credential directories without following
+   symlinks or accepting job-supplied paths. Hidden residual files are failures;
+   unavailable volume roots and unsafe paths are unobservable. The coordinator
+   separately verifies namespace and run-scoped RBAC disposal. Accepted job
+   evidence remains **untrusted**. Transient collection errors retain their source
+   for a later `collect`; privileged deletion uses only the host ledger's UIDs.
 
 The resource namespace is garbage-collected before the runner namespace. A scoped
 guard verifies namespace absence because its namespaced read permissions disappear
@@ -104,16 +113,48 @@ disposal is still attempted when a resource remains stuck.
 ## Inspect the evidence
 
 Each run has `.build/coordinator/RUN_ID/run.json` plus any collected
-`cleanup-evidence.json`, `guard.json` and `job.log`. These files stay out of Git.
-The ledger records Pod UID, image identity, observed termination, cancellation,
-digests, missing/rejected evidence and recovery errors. The staging area is mutable
-and untrusted; it is not the future immutable S3-compatible archive.
+`cleanup-evidence.json`, `guard.json`, `collector.json` and `job.log`. These files
+stay out of Git. The ledger records run/source/image identity, cluster/resource/
+runner/Job/Pod/container identities, observed termination, cancellation, exact
+artifact hashes, missing/rejected evidence and recovery errors. Raw CRI `job.log`
+records include timestamps, stdout/stderr stream names, record tags and payloads;
+they cover the guard and its child command, not node services or init diagnostics.
+The staging area is mutable and untrusted; these local files are not an immutable
+S3-compatible archive.
 
-`phase: complete` means coordinator collection/disposal finished. It does not mean
-the test passed or that a signed cleanup receipt exists. Preliminary evidence
-stays unsigned and partial (or failed); log snapshots are `snapshot-unattested`.
-Complete log coverage, signing, finalizer identity, API ingestion and dashboard
-visibility are later milestones. No receipts are inserted into PostgreSQL here.
+The host publishes canonical `observations.json` with five independent coverage
+results and the SHA-256 of the exact completed ledger. It then atomically publishes
+`finalization-ready.json` **last**, binding both ledger and observation hashes.
+`phase: complete` alone is insufficient for finalization: a finalizer must defer
+without freezing inputs until a valid readiness marker exists. `collect` repairs
+interrupted publication without changing the completed ledger; conflicting
+snapshots are rejected. Old runs lacking a readiness marker cannot be finalized
+automatically.
+
+Preliminary evidence stays unsigned and partial (or failed). The collector's
+observations are unsigned **trusted host** data, accepted only from the private
+operator-configured ledger directory. Signing a job claim does not upgrade its
+observer. Fully observed raw logs use ledger status `complete`; legacy snapshots
+remain `snapshot-unattested`. Credential coverage combines stopped-runner file
+absence with independently confirmed runner namespace and RBAC disposal. It does
+not assert external credential revocation or physical storage erasure.
+
+The observer is built from `cmd/observe` and installed at
+`/usr/local/bin/proof-observe` only in `cleanup-receipt-control-plane`. It changes
+no global kubelet, firewall, or laptop settings. Its lifetime is bounded at fifteen
+minutes and its log spool at 100 MiB per run. Node-spool loss remains incomplete;
+the per-run bound does not replace operator-managed retention of historical runs.
+
+The unchanged live six-case regression passed with this collector. Pass, failed
+test command, graceful cancellation, coordinator restart and isolation all had
+independent verified coverage. The SIGKILL/missing-post case retained complete
+logs but independently detected residual workspace and credential files, requiring
+a failed cleanup outcome. Every case published a valid readiness marker. See the
+[coordinator contract and validation record](../internal/coordinator/README.md)
+for run IDs, fault tests and exact limits. Finalizer keyless signing and immutable
+archival are milestone d's separate integration work; API ingestion and dashboard
+visibility remain later milestones. No receipts are inserted into PostgreSQL by
+the coordinator.
 
 The disabled GitHub workflow and adapter are documented in [guard.md](guard.md).
 Local lifecycle tests do not validate GitHub's post-step or cancellation behavior.

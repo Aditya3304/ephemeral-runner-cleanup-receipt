@@ -119,7 +119,7 @@ func (c *Coordinator) Collect(ctx context.Context, run string) (*Ledger, error) 
 		return nil, err
 	}
 	if l.Phase == "complete" {
-		return l, nil
+		return l, c.publishObservations(l)
 	}
 	cluster, err := c.K.CoreV1().Namespaces().Get(ctx, "kube-system", meta.GetOptions{})
 	if err != nil {
@@ -287,7 +287,10 @@ func (c *Coordinator) finishDisposal(ctx context.Context, l *Ledger) error {
 		return errors.Join(err, c.save(l))
 	}
 	l.Phase = "complete"
-	return c.save(l)
+	if err := c.save(l); err != nil {
+		return err
+	}
+	return c.publishObservations(l)
 }
 
 func (c *Coordinator) observePod(ctx context.Context, l *Ledger) (bool, error) {
@@ -355,6 +358,10 @@ func (c *Coordinator) observePod(ctx context.Context, l *Ledger) (bool, error) {
 	}
 	for _, status := range pod.Status.ContainerStatuses {
 		if status.Name == "guard" {
+			if l.ContainerID != status.ContainerID {
+				l.ContainerID = status.ContainerID
+				changed = true
+			}
 			if l.ActualImage != status.ImageID {
 				l.ActualImage = status.ImageID
 				changed = true
@@ -545,9 +552,11 @@ func (c *Coordinator) dispose(ctx context.Context, l *Ledger) error {
 
 	bindingCtx, bindingCancel := context.WithTimeout(context.WithoutCancel(ctx), 15*time.Second)
 	bindingErr := c.disposeBinding(bindingCtx, l)
+	l.BindingAbsent = bindingErr == nil
 	bindingCancel()
 	roleCtx, roleCancel := context.WithTimeout(context.WithoutCancel(ctx), 15*time.Second)
 	roleErr := c.disposeRole(roleCtx, l)
+	l.RoleAbsent = roleErr == nil
 	roleCancel()
 	return errors.Join(resourceErr, runnerErr, bindingErr, roleErr)
 }

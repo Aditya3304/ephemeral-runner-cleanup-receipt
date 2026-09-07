@@ -1,0 +1,63 @@
+name: cleanup-receipt-finalizer
+
+services:
+  init-state:
+    image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+    pull_policy: never
+    profiles: [tools]
+    network_mode: none
+    entrypoint: [bash, -ec]
+    command: ['chown 65532:65532 /state /output; chmod 700 /state /output']
+    volumes:
+      - state:/state
+      - output:/output
+    mem_limit: 64m
+
+  finalizer:
+    image: ${FINALIZER_IMAGE:?Run scripts/finalizer-run.sh with a built finalizer}
+    pull_policy: never
+    user: '65532:65532'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: [/tmp:rw,noexec,nosuid,size=384m,uid=65532,gid=65532,mode=700]
+    pids_limit: 64
+    cpus: 1.0
+    mem_limit: 768m
+    environment:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    networks: [archive, sigstore]
+    command: [--config, /config/finalizer.json]
+    volumes:
+      - ./.build/coordinator:/input:ro
+      - ./.build/finalizer-config.json:/config/finalizer.json:ro
+      - archive-credentials:/secrets/archive:ro
+      - finalizer-identity:/secrets/signing:ro
+      - sigstore-trust:/trust:ro
+      - state:/state
+      - output:/output
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: '2'}
+
+networks:
+  archive:
+    external: true
+    name: cleanup-receipt-archive
+  sigstore:
+    external: true
+    name: cleanup-receipt-sigstore_sigstore
+
+volumes:
+  archive-credentials:
+    external: true
+    name: cleanup-receipt-archive_finalizer
+  finalizer-identity:
+    external: true
+    name: cleanup-receipt-sigstore_finalizer-identity
+  sigstore-trust:
+    external: true
+    name: cleanup-receipt-sigstore_sigstore-trust
+  state:
+  output:

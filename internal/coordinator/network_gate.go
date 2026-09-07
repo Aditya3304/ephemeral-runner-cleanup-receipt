@@ -197,6 +197,14 @@ func (c *Coordinator) ensureGateWith(ctx context.Context, l *Ledger, pod *core.P
 		}
 		return err
 	}
+	// Production connections must arm the detached trusted collector while this
+	// exact init invocation still holds the workload. Fake API clients in the
+	// network-gate unit tests do not have an external kind runtime.
+	if c.Config != nil {
+		if err = c.armCollector(ctx, l, sandbox); err != nil {
+			return err
+		}
+	}
 	latest, err := c.K.CoreV1().ConfigMaps(l.RunnerNamespace).Get(ctx, "runner-gate-request", meta.GetOptions{})
 	if apierrors.IsNotFound(err) {
 		return nil

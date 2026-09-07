@@ -88,6 +88,9 @@ func validateEvidence(data []byte, l *Ledger) error {
 	return nil
 }
 
+// ValidateEvidence validates untrusted job evidence without elevating provenance.
+func ValidateEvidence(data []byte, l *Ledger) error { return validateEvidence(data, l) }
+
 func (c *Coordinator) collectStage(ctx context.Context, l *Ledger) error {
 	stage, err := c.K.CoreV1().ConfigMaps(l.RunnerNamespace).Get(ctx, "guard-stage", meta.GetOptions{})
 	if err != nil {
@@ -136,6 +139,9 @@ func (c *Coordinator) collectStage(ctx context.Context, l *Ledger) error {
 // This stage is bounded staging, not complete-log attestation or immutable archive.
 // Pod loss/API error/limit preserves an explicit gap and never claims coverage.
 func (c *Coordinator) collectLogs(ctx context.Context, l *Ledger) error {
+	if l.CollectorRequest != nil {
+		return c.collectTrusted(ctx, l)
+	}
 	if l.PodUID == "" {
 		l.LogsStatus = "missing"
 		return nil

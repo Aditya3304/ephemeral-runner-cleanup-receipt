@@ -1,0 +1,369 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cleanup-receipt:v1",
+  "title": "Cleanup Receipt v1",
+  "description": "Exact bounded receipt shape. Go ParseReceipt additionally enforces canonical bytes, byte limits, chronology, identity/UID binding, reference scope, and derived verdict semantics.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "identity",
+    "binding",
+    "finalizer",
+    "started_at",
+    "completed_at",
+    "finalized_at",
+    "evidence_status",
+    "coverage",
+    "objects",
+    "log_objects",
+    "verdict"
+  ],
+  "properties": {
+    "kind": {
+      "const": "cleanup-receipt/v1"
+    },
+    "identity": {
+      "$ref": "#/$defs/identity"
+    },
+    "binding": {
+      "$ref": "#/$defs/binding"
+    },
+    "finalizer": {
+      "$ref": "#/$defs/finalizer"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finalized_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_status": {
+      "enum": [
+        "accepted-untrusted",
+        "missing",
+        "invalid"
+      ]
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspace",
+        "credentials",
+        "resources",
+        "logs",
+        "runner_disposal"
+      ],
+      "properties": {
+        "workspace": {
+          "$ref": "#/$defs/observation"
+        },
+        "credentials": {
+          "$ref": "#/$defs/observation"
+        },
+        "resources": {
+          "$ref": "#/$defs/observation"
+        },
+        "logs": {
+          "$ref": "#/$defs/observation"
+        },
+        "runner_disposal": {
+          "$ref": "#/$defs/observation"
+        }
+      }
+    },
+    "objects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run.json"
+      ],
+      "properties": {
+        "run.json": {
+          "$ref": "#/$defs/archiveRef"
+        },
+        "observations.json": {
+          "$ref": "#/$defs/archiveRef"
+        },
+        "cleanup-evidence.json": {
+          "$ref": "#/$defs/archiveRef"
+        }
+      },
+      "minProperties": 1,
+      "maxProperties": 3
+    },
+    "log_objects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/archiveRef"
+      },
+      "maxItems": 1
+    },
+    "verdict": {
+      "enum": [
+        "pass",
+        "fail",
+        "partial"
+      ]
+    }
+  },
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "repository",
+        "run_id",
+        "run_attempt",
+        "job_id",
+        "source_revision"
+      ],
+      "properties": {
+        "provider": {
+          "const": "local"
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 32,
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "run_attempt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "job_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "source_revision": {
+          "type": "string",
+          "minLength": 40,
+          "maxLength": 64,
+          "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$"
+        }
+      }
+    },
+    "archiveRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "store",
+        "bucket",
+        "key",
+        "version_id",
+        "sha256",
+        "size_bytes"
+      ],
+      "properties": {
+        "store": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[^:/\\\\]+$"
+        },
+        "bucket": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 63,
+          "pattern": "^[^:/\\\\]+$"
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "version_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "not": {
+            "const": "null"
+          }
+        },
+        "sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 104857600
+        }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "observer",
+        "reason"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "verified",
+            "failed",
+            "unsupported",
+            "unobservable"
+          ]
+        },
+        "observer": {
+          "enum": [
+            "trusted",
+            "job",
+            "none"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "observer": {
+                "const": "none"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "status": {
+                "const": "unobservable"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cluster_uid",
+        "resource_namespace",
+        "resource_uid",
+        "runner_namespace",
+        "runner_uid",
+        "job_uid",
+        "pod_uid",
+        "ledger_sha256"
+      ],
+      "properties": {
+        "cluster_uid": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 255
+        },
+        "resource_namespace": {
+          "type": "string",
+          "minLength": 38,
+          "maxLength": 38,
+          "pattern": "^proof-[0-9a-f]{32}$"
+        },
+        "resource_uid": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 255
+        },
+        "runner_namespace": {
+          "type": "string",
+          "minLength": 45,
+          "maxLength": 45,
+          "pattern": "^proof-runner-[0-9a-f]{32}$"
+        },
+        "runner_uid": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 255
+        },
+        "job_uid": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 255
+        },
+        "pod_uid": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 255
+        },
+        "ledger_sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "finalizer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revision",
+        "issuer",
+        "identity",
+        "trust_root_sha256",
+        "cosign_sha256",
+        "signing_config_sha256"
+      ],
+      "properties": {
+        "revision": {
+          "type": "string",
+          "minLength": 40,
+          "maxLength": 64,
+          "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "identity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "trust_root_sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "cosign_sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "signing_config_sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

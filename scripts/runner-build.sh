@@ -6,10 +6,13 @@ export GOTOOLCHAIN=local CGO_ENABLED=0 GOPROXY=off GOSUMDB=off
 go build -p 2 -trimpath -o .build/proofctl ./cmd/proofctl
 go build -p 2 -trimpath -o .build/localci ./cmd/localci
 go build -p 2 -trimpath -o .build/netgate ./cmd/netgate
+go build -p 2 -trimpath -o .build/observe ./cmd/observe
 # Install the trusted helper only in this project's kind node. It pins and
 # configures a verified runner network namespace; it never changes host rules.
 docker cp .build/netgate cleanup-receipt-control-plane:/usr/local/bin/proof-netgate
 docker exec cleanup-receipt-control-plane chmod 0555 /usr/local/bin/proof-netgate
+docker cp .build/observe cleanup-receipt-control-plane:/usr/local/bin/proof-observe
+docker exec cleanup-receipt-control-plane chmod 0555 /usr/local/bin/proof-observe
 npm run build --workspace action --offline
 digest=$(find action/dist examples -type f -print0 | sort -z | xargs -0 sha256sum; sha256sum .build/proofctl infra/runner.Dockerfile)
 tag="cleanup-receipt/runner:$(printf '%s' "$digest" | sha256sum | cut -c1-32)"

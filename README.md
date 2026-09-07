@@ -4,7 +4,7 @@ A local, offline-capable cleanup evidence pipeline for disposable Kubernetes CI
 runners. Built with Go, PostgreSQL, a TypeScript guard, a trusted Sigstore finalizer,
 S3-compatible evidence storage and a React dashboard.
 
-**Current milestone: c — guard and local CI coordinator complete and validated.**
+**Current milestone: d — trusted finalizer and private local signing in progress.**
 PostgreSQL, cleanup CLI, Node 24 guard and local coordinator are implemented.
 Offline Cosign verification works; the private signing service, trusted finalizer,
 API and dashboard remain pending. No GitHub workflows or AWS resources are running.
@@ -18,7 +18,7 @@ For automatic job cleanup, see the [local CI guide](docs/local-ci.md) and
 local job after one-time `bash dev ci-prepare` setup. Both should invoke cleanup;
 evidence remains unsigned and partial until trusted finalization is implemented.
 The [milestone c validation record](docs/guard-validation.md) records all six live
-scenarios and the remaining limitations. Milestone d awaits user confirmation.
+scenarios and the remaining limitations. Milestone d is now approved and in progress.
 
 ## Run the foundation
 

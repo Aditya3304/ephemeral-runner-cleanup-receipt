@@ -12,46 +12,52 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/coordinator/observer"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/proof"
 	jcs "github.com/cyberphone/json-canonicalization/go/src/webpki.org/jsoncanonicalizer"
 	"golang.org/x/sys/unix"
 )
 
 type Ledger struct {
-	Kind              string         `json:"kind"`
-	Identity          proof.Identity `json:"identity"`
-	Token             string         `json:"token"`
-	ClusterUID        string         `json:"cluster_uid"`
-	ResourceNamespace string         `json:"resource_namespace"`
-	ResourceUID       string         `json:"resource_uid"`
-	RunnerNamespace   string         `json:"runner_namespace"`
-	RunnerUID         string         `json:"runner_uid"`
-	JobUID            string         `json:"job_uid"`
-	LaunchAttempted   bool           `json:"launch_attempted"`
-	PodName           string         `json:"pod_name"`
-	PodUID            string         `json:"pod_uid"`
-	StageUID          string         `json:"stage_uid"`
-	RoleUID           string         `json:"role_uid"`
-	BindingUID        string         `json:"binding_uid"`
-	Image             string         `json:"image"`
-	ActualImage       string         `json:"actual_image"`
-	Command           []string       `json:"command"`
-	TimeoutSeconds    int64          `json:"timeout_seconds"`
-	Phase             string         `json:"phase"`
-	CreatedAt         time.Time      `json:"created_at"`
-	UpdatedAt         time.Time      `json:"updated_at"`
-	CancelRequested   bool           `json:"cancel_requested"`
-	PodExitCode       *int32         `json:"pod_exit_code"`
-	PodReason         string         `json:"pod_reason"`
-	EvidenceStatus    string         `json:"evidence_status"`
-	EvidenceDigest    string         `json:"evidence_sha256"`
-	GuardDigest       string         `json:"guard_sha256"`
-	LogsStatus        string         `json:"logs_status"`
-	LogsDigest        string         `json:"logs_sha256"`
-	LogsBytes         int64          `json:"logs_bytes"`
-	ResourceAbsent    bool           `json:"resource_absent"`
-	RunnerAbsent      bool           `json:"runner_absent"`
-	Errors            []string       `json:"errors"`
+	Kind              string            `json:"kind"`
+	Identity          proof.Identity    `json:"identity"`
+	Token             string            `json:"token"`
+	ClusterUID        string            `json:"cluster_uid"`
+	ResourceNamespace string            `json:"resource_namespace"`
+	ResourceUID       string            `json:"resource_uid"`
+	RunnerNamespace   string            `json:"runner_namespace"`
+	RunnerUID         string            `json:"runner_uid"`
+	JobUID            string            `json:"job_uid"`
+	LaunchAttempted   bool              `json:"launch_attempted"`
+	PodName           string            `json:"pod_name"`
+	PodUID            string            `json:"pod_uid"`
+	StageUID          string            `json:"stage_uid"`
+	RoleUID           string            `json:"role_uid"`
+	BindingUID        string            `json:"binding_uid"`
+	Image             string            `json:"image"`
+	ActualImage       string            `json:"actual_image"`
+	Command           []string          `json:"command"`
+	TimeoutSeconds    int64             `json:"timeout_seconds"`
+	Phase             string            `json:"phase"`
+	CreatedAt         time.Time         `json:"created_at"`
+	UpdatedAt         time.Time         `json:"updated_at"`
+	CancelRequested   bool              `json:"cancel_requested"`
+	PodExitCode       *int32            `json:"pod_exit_code"`
+	PodReason         string            `json:"pod_reason"`
+	EvidenceStatus    string            `json:"evidence_status"`
+	EvidenceDigest    string            `json:"evidence_sha256"`
+	GuardDigest       string            `json:"guard_sha256"`
+	LogsStatus        string            `json:"logs_status"`
+	LogsDigest        string            `json:"logs_sha256"`
+	LogsBytes         int64             `json:"logs_bytes"`
+	ResourceAbsent    bool              `json:"resource_absent"`
+	RunnerAbsent      bool              `json:"runner_absent"`
+	RoleAbsent        bool              `json:"role_absent"`
+	BindingAbsent     bool              `json:"binding_absent"`
+	ContainerID       string            `json:"container_id"`
+	CollectorRequest  *observer.Request `json:"collector_request,omitempty"`
+	CollectorDigest   string            `json:"collector_sha256,omitempty"`
+	Errors            []string          `json:"errors"`
 }
 
 var runPattern = regexp.MustCompile(`^[0-9a-f]{32}$`)

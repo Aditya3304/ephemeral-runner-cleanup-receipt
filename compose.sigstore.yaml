@@ -1,0 +1,155 @@
+name: cleanup-receipt-sigstore
+
+x-runtime: &runtime
+  pull_policy: never
+  user: '65532:65532'
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  tmpfs: [/tmp]
+  networks: [sigstore]
+  cpus: 1.0
+  restart: unless-stopped
+  environment:
+    GOMEMLIMIT: 192MiB
+    GOMAXPROCS: '2'
+  logging:
+    driver: json-file
+    options: {max-size: 5m, max-file: '2'}
+
+services:
+  bootstrap:
+    image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+    pull_policy: never
+    profiles: [tools]
+    network_mode: none
+    entrypoint: [bash, /bootstrap.sh]
+    mem_limit: 256m
+    volumes:
+      - ./scripts/sigstore-bootstrap.sh:/bootstrap.sh:ro
+      - ./.build/cosign:/tools/cosign:ro
+      - sigstore-admin:/run/admin
+      - issuer-secrets:/run/issuer
+      - signingsecrets:/run/finalizer
+      - fulcio-secrets:/run/fulcio
+      - ctlog-secrets:/run/ctlog
+      - rekor-secrets:/run/rekor
+      - tsa-secrets:/run/tsa
+      - sigstore-trust:/run/trust
+      - ctlog-data:/data/ctlog
+      - rekor-data:/data/rekor
+
+  issuer:
+    <<: *runtime
+    image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+    entrypoint: [/app/localissuer]
+    command: [--listen=:8443, --issuer=https://issuer:8443]
+    mem_limit: 128m
+    volumes:
+      - ./.build/localissuer:/app/localissuer:ro
+      - issuer-secrets:/run/issuer:ro
+
+  ctlog:
+    <<: *runtime
+    image: ghcr.io/transparency-dev/tesseract/posix:v0.1.1@sha256:8269c32a1b1deb159ba75016421314cb5e68304c2813d444aca3efdf0e9d5027
+    command:
+      - --http_endpoint=0.0.0.0:6962
+      - --storage_dir=/data
+      - --origin=ctlog
+      - --accept_sha1_signing_algorithms=false
+      - --ext_key_usages=CodeSigning
+      - --private_key=/run/ctlog/key.pem
+      - --roots_pem_file=/run/ctlog/fulcio-root.pem
+      - --inmemory_antispam_cache_size=1k
+      - --checkpoint_interval=2s
+      - --v=1
+    mem_limit: 256m
+    volumes:
+      - ctlog-secrets:/run/ctlog:ro
+      - ctlog-data:/data
+
+  fulcio:
+    <<: *runtime
+    image: gcr.io/projectsigstore/fulcio:v1.8.5@sha256:b51ed0cb6761070d632bf81d28894ef1827b2c18da2535689ca8e98d91d3a015
+    command:
+      - serve
+      - --host=0.0.0.0
+      - --port=5555
+      - --ca=fileca
+      - --fileca-key=/run/fulcio/key.pem
+      - --fileca-cert=/run/fulcio/cert.pem
+      - --config=/run/fulcio/server.yaml
+      - --config-path=/run/fulcio/config.yaml
+      - --ct-log-url=http://ctlog:6962
+    mem_limit: 256m
+    depends_on: [issuer, ctlog]
+    volumes:
+      - fulcio-secrets:/run/fulcio:ro
+
+  rekor:
+    <<: *runtime
+    image: ghcr.io/sigstore/rekor-tiles/posix:v2.2.1@sha256:627422bf9da146d1d9ff4e1c1e8301a1780ab6ad9b32bccff51ecd9f8c820e41
+    command:
+      - rekor-server
+      - serve
+      - --http-address=0.0.0.0
+      - --grpc-address=0.0.0.0
+      - --hostname=rekor
+      - --signer-filepath=/run/rekor/key.pem
+      - --storage-dir=/data
+      - --checkpoint-interval=2s
+      - --persistent-antispam
+    mem_limit: 256m
+    volumes:
+      - rekor-secrets:/run/rekor:ro
+      - rekor-data:/data
+
+  tsa:
+    <<: *runtime
+    image: ghcr.io/sigstore/timestamp-server:v2.0.6@sha256:bb2e57fe86ba114663ed7cf98291add3c4131115169abf2929ec870c09d2493f
+    command:
+      - serve
+      - --timestamp-signer=file
+      - --host=0.0.0.0
+      - --port=3000
+      - --disable-ntp-monitoring
+      - --file-signer-key-path=/run/tsa/key.pem
+      - --certificate-chain-path=/run/tsa/chain.pem
+    mem_limit: 256m
+    volumes:
+      - tsa-secrets:/run/tsa:ro
+
+  # Only this explicitly requested one-shot tool receives finalizer credentials.
+  client:
+    <<: *runtime
+    image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+    profiles: [tools]
+    restart: 'no'
+    entrypoint: [bash]
+    command: [/scripts/sigstore-check.sh, inside]
+    mem_limit: 512m
+    volumes:
+      - ./.build/cosign:/tools/cosign:ro
+      - ./.build/sigstore-http:/tools/http:ro
+      - ./scripts/sigstore-check.sh:/scripts/sigstore-check.sh:ro
+      - signingsecrets:/run/finalizer:ro
+      - sigstore-trust:/run/trust:ro
+      - ./.build/sigstore:/work
+
+networks:
+  sigstore:
+    name: cleanup-receipt-sigstore_sigstore
+    internal: true
+
+volumes:
+  sigstore-admin:
+  issuer-secrets:
+  signingsecrets:
+    name: cleanup-receipt-sigstore_finalizer-identity
+  fulcio-secrets:
+  ctlog-secrets:
+  rekor-secrets:
+  tsa-secrets:
+  sigstore-trust:
+  ctlog-data:
+  rekor-data:

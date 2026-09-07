@@ -8,8 +8,8 @@ Each completed milestone is demonstrated and requires confirmation before the ne
 | Plan approval | Approved | Local Kubernetes CI, private Sigstore, local MinIO/PostgreSQL; no paid cloud resources |
 | a: foundation | Complete; milestone b approved | Repository, schema/migrations, TLS, restricted database roles and repeatable local commands |
 | b: cleanup CLI | Complete; milestone c approved | Cobra/client-go commands, real kind cleanup, canonical preliminary evidence and offline Sigstore verification |
-| c: guard/coordinator | Complete; awaiting approval for d | Local job lifecycle, durable coordinator, isolated runners and disabled GitHub adapter |
-| d: signing/finalizer | Not started | Local identity/Sigstore, trusted archival, canonical receipt |
+| c: guard/coordinator | Complete; milestone d approved | Local job lifecycle, durable coordinator, isolated runners and disabled GitHub adapter |
+| d: signing/finalizer | In progress | Local identity/Sigstore, trusted archival, canonical receipt |
 | e: API | Not started | Chi/pgx verification, sanitization, transactional ingestion and queries |
 | f: dashboard | Not started | React/Vite/Tailwind/TanStack search/detail/incident UI |
 | g: watchdog | Not started | Missing-finalization recovery and incidents |

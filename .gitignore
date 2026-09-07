@@ -11,4 +11,6 @@ coverage/
 *.p12
 *.log
 *.test
+__pycache__/
+*.pyc
 .DS_Store

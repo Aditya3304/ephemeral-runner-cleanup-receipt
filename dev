@@ -12,6 +12,19 @@ build() {
   go test -c -trimpath -o .build/db.test ./db
 }
 case "${1:-help}" in
+  finalizer-prepare)
+    bash scripts/archive-prepare.sh
+    bash scripts/sigstore-prepare.sh
+    bash scripts/finalizer-build.sh
+    ;;
+  finalizer-build) bash scripts/finalizer-build.sh ;;
+  finalizer-up) bash scripts/archive-up.sh; bash scripts/sigstore-up.sh ;;
+  finalizer-demo) python3 scripts/demo-finalizer.py ;;
+  finalizer-check) python3 scripts/demo-finalizer.py pass fail missing-post ;;
+  finalize) shift; bash scripts/finalizer-run.sh "$@" ;;
+  verify-finalized) shift; python3 scripts/finalizer-verify.py "$@" ;;
+  archive-check) bash scripts/archive-test.sh ;;
+  signing-check) bash scripts/sigstore-check.sh ;;
   ci-prepare) bash scripts/ci-prepare.sh ;;
   ci-build) bash scripts/runner-build.sh ;;
   ci-up) bash scripts/kind-up.sh; bash scripts/policy-up.sh ;;
@@ -76,5 +89,13 @@ case "${1:-help}" in
     echo 'bash dev ci-demo      Run passing and failing jobs with automatic cleanup.'
     echo 'bash dev ci-check     Run the real lifecycle and isolation checks.'
     echo 'bash dev guard-check Test guard lifecycle and coordinator trust boundaries.'
+    echo 'bash dev finalizer-prepare Cache signing/storage services and build approved finalizer (setup).'
+    echo 'bash dev finalizer-up Start private local signing and protected storage (no downloads).'
+    echo 'bash dev finalizer-demo Run real passing/failing jobs, archive and sign, then verify offline.'
+    echo 'bash dev finalizer-check Include abruptly terminated job with an honest failure receipt.'
+    echo 'bash dev finalize RUN Finalize a completed coordinator run using the isolated service.'
+    echo 'bash dev verify-finalized RUN Verify a published receipt and negative cases without network.'
+    echo 'bash dev archive-check Test real encryption, retention, versions and scoped access.'
+    echo 'bash dev signing-check Test private keyless signing and network-disabled verification.'
     ;;
 esac
