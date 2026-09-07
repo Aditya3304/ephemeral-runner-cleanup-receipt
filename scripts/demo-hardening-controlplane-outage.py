@@ -10,6 +10,7 @@ before=set((ROOT/'.build/coordinator').glob('*/run.json'))
 revision=command(['git','rev-parse','HEAD']).stdout.strip()
 process=subprocess.Popen([str(ROOT/'.build/localci'),'run','--revision',revision,'--job','hardening-controlplane','--timeout','10s','--','/usr/local/bin/node','/opt/examples/local-job.mjs','wait'],cwd=ROOT,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
 path=None
+initial_container_id=None
 try:
     deadline=time.monotonic()+120
     while time.monotonic()<deadline:
@@ -20,7 +21,13 @@ try:
                 stage=command(['kubectl','--kubeconfig',str(ROOT/'.build/kubeconfig'),'-n',ledger['runner_namespace'],'get','configmap','guard-stage','-o','json'],check=False)
                 if stage.returncode==0:
                     status=json.loads(json.loads(stage.stdout).get('data',{}).get('guard.json','{}'))
-                    if status.get('main_completed'): break
+                    if status.get('main_completed'):
+                        pod=command(['kubectl','--kubeconfig',str(ROOT/'.build/kubeconfig'),'-n',ledger['runner_namespace'],'get','pod',ledger['pod_name'],'-o','json'])
+                        containers=json.loads(pod.stdout)['status']['containerStatuses']
+                        guard=next(item for item in containers if item['name']=='guard')
+                        assert guard['restartCount']==0 and guard['containerID'].startswith('containerd://')
+                        initial_container_id=guard['containerID']
+                        break
         if process.poll() is not None: raise RuntimeError('Coordinator exited before fault injection')
         time.sleep(.25)
     else: raise RuntimeError('Job command did not begin')
@@ -48,11 +55,12 @@ try:
     final=watchdog_state(ledger['identity']); assert final['current']['result']=='succeeded' and final['current']['attempt_number']==2
     completed=json.loads(path.read_text())
     assert completed['resource_absent'] and completed['runner_absent']
-    assert (path.parent/'job.log').read_text().count('LOCAL_JOB_STARTED wait')==1
+    assert completed['pod_uid']==ledger['pod_uid'] and completed['container_id']==initial_container_id
+    assert not (path.parent/'job.log').exists() and completed['logs_status']=='missing'
     row=receipt_for(run_id); assert row['verdict']!='pass'
     assert row['incident'] is not None and row['incident']['state']=='open'
     verification=verify_receipt(row['id'])
-    report={'kind':'hardening-controlplane-outage/v1','checked_at':utc_now(),'run_id':run_id,'receipt_id':row['id'],'incident_id':row['incident']['id'],'incident_count':1,'first_attempt':{'result':'retry','stage':'collect','error_code':failed['current']['error_code']},'recovered_attempt':2,'command_runs':1,'resources_absent':True,'runner_absent':True,'verdict':row['verdict'],'signature':verification['signature'],'artifacts':verification['artifacts']}
+    report={'kind':'hardening-controlplane-outage/v1','checked_at':utc_now(),'run_id':run_id,'receipt_id':row['id'],'incident_id':row['incident']['id'],'incident_count':1,'first_attempt':{'result':'retry','stage':'collect','error_code':failed['current']['error_code']},'recovered_attempt':2,'command_runs':1,'container_id':initial_container_id,'restart_count':0,'logs_status':'missing','resources_absent':True,'runner_absent':True,'verdict':row['verdict'],'signature':verification['signature'],'artifacts':verification['artifacts']}
     (ROOT/'.build/hardening-controlplane-outage.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report,indent=2))
 finally:
