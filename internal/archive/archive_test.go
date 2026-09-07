@@ -160,15 +160,31 @@ func TestRealArchive(t *testing.T) {
 		}
 		denied(t, err)
 	})
-	t.Run("verifier-wire-get-without-version-denied",func(t *testing.T){
-		u,err:=verifier.s3.Presign(ctx,http.MethodGet,ref.Bucket,ref.Key,time.Minute,nil)
-		if err!=nil{t.Fatal(err)}
-		if _,ok:=u.Query()["versionId"];ok{t.Fatal("probe unexpectedly includes versionId")}
-		req,err:=http.NewRequestWithContext(ctx,http.MethodGet,u.String(),nil);if err!=nil{t.Fatal(err)}
-		hc:=&http.Client{Transport:verifier.transport,Timeout:10*time.Second,CheckRedirect:func(*http.Request,[]*http.Request)error{return http.ErrUseLastResponse}}
-		resp,err:=hc.Do(req);if err!=nil{t.Fatal(err)};defer resp.Body.Close()
-		body,err:=io.ReadAll(io.LimitReader(resp.Body,4096));if err!=nil{t.Fatal(err)}
-		if resp.StatusCode!=http.StatusForbidden || !bytes.Contains(body,[]byte("<Code>AccessDenied</Code>")){t.Fatalf("unversioned wire GET not denied: %d %s",resp.StatusCode,body)}
+	t.Run("verifier-wire-get-without-version-denied", func(t *testing.T) {
+		u, err := verifier.s3.Presign(ctx, http.MethodGet, ref.Bucket, ref.Key, time.Minute, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, ok := u.Query()["versionId"]; ok {
+			t.Fatal("probe unexpectedly includes versionId")
+		}
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		hc := &http.Client{Transport: verifier.transport, Timeout: 10 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+		resp, err := hc.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(io.LimitReader(resp.Body, 4096))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if resp.StatusCode != http.StatusForbidden || !bytes.Contains(body, []byte("<Code>AccessDenied</Code>")) {
+			t.Fatalf("unversioned wire GET not denied: %d %s", resp.StatusCode, body)
+		}
 		t.Log("direct signed HTTP GET without versionId: 403 AccessDenied (no SDK lazy reader)")
 	})
 	t.Run("verifier-cannot-extend-retention", func(t *testing.T) {
