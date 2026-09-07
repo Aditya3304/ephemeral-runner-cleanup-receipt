@@ -2,9 +2,13 @@
 
 ## Ownership and transport
 
-The application schema is `evidence`. Only the future API is a runtime database
+The application schema is `evidence`. Only the API is a runtime database
 writer. PostgreSQL's administrative user is confined to one-shot migration/test
 tools and container initialization. `proof_api` is a separate restricted role.
+
+Milestone e implements that boundary: [API guide](api.md),
+[actual validation](api-validation.md). Genuine receipts now populate the main
+database; synthetic schema/transaction tests use separate temporary databases.
 
 No TCP port is published. The internal Compose network has no external gateway.
 Network connections require TLS; clients use `sslmode=verify-full` with the local

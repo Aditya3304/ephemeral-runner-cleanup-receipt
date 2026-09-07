@@ -1,0 +1,84 @@
+name: cleanup-receipt-api
+services:
+  init:
+    image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+    pull_policy: never
+    profiles: [tools]
+    network_mode: none
+    entrypoint: [bash, /bootstrap.sh]
+    volumes:
+      - ./scripts/api-bootstrap.sh:/bootstrap.sh:ro
+      - database-source:/source:ro
+      - database-runtime:/database
+      - auth:/auth
+      - delivery:/delivery
+  api:
+    image: ${API_IMAGE:?Run scripts/api-up.sh}
+    pull_policy: never
+    user: '65532:65532'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=384m,uid=65532,gid=65532,mode=700']
+    pids_limit: 64
+    cpus: 1.0
+    mem_limit: 768m
+    environment: {GOMEMLIMIT: 512MiB, GOMAXPROCS: '2'}
+    command: [/usr/local/bin/api]
+    networks: [metadata, archive, delivery]
+    volumes:
+      - ./.build/api-config.json:/config/api.json:ro
+      - database-runtime:/run/api:ro
+      - auth:/run/auth:ro
+      - archive-verifier:/run/archive-verifier:ro
+      - archive-public:/run/archive-public:ro
+      - public-trust:/trust:ro
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: '2'}
+  gateway:
+    image: ${API_IMAGE:?Run scripts/api-up.sh}
+    pull_policy: never
+    user: '65532:65532'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 64m
+    pids_limit: 32
+    command: [/usr/local/bin/gateway]
+    ports: ['127.0.0.1:8080:8080']
+    networks: [edge, delivery]
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: '2'}
+  deliver:
+    image: ${API_IMAGE:?Run scripts/api-up.sh}
+    pull_policy: never
+    profiles: [tools]
+    user: '65532:65532'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [delivery]
+    command: [/usr/local/bin/deliver]
+    volumes:
+      - auth:/run/auth:ro
+      - delivery:/delivery
+      - finalizer-output:/input:ro
+    mem_limit: 128m
+networks:
+  edge: {}
+  metadata: {external: true, name: cleanup-receipt_metadata}
+  archive: {external: true, name: cleanup-receipt-archive}
+  delivery: {internal: true}
+volumes:
+  database-source: {external: true, name: cleanup-receipt_api-secrets}
+  archive-verifier: {external: true, name: cleanup-receipt-archive_verifier}
+  archive-public: {external: true, name: cleanup-receipt-archive_public}
+  public-trust: {external: true, name: cleanup-receipt-sigstore_sigstore-trust}
+  finalizer-output: {external: true, name: cleanup-receipt-finalizer_output}
+  database-runtime:
+  auth:
+  delivery:

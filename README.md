@@ -4,18 +4,26 @@ A local, offline-capable cleanup evidence pipeline for disposable Kubernetes CI
 runners. Built with Go, PostgreSQL, a TypeScript guard, a trusted Sigstore finalizer,
 S3-compatible evidence storage and a React dashboard.
 
-**Current milestone: d — trusted finalizer, protected archive and private signing complete.**
+**Current milestone: e — verified API ingestion and local incidents complete.**
 PostgreSQL, cleanup CLI, Node 24 guard, local coordinator, independent observer,
 private Sigstore and MinIO archive work locally. Six real lifecycle scenarios now
-produce verified signed cleanup receipts. API ingestion, dashboard and watchdog
-remain pending. No hosted GitHub workflows or AWS resources are running.
+produce verified signed cleanup receipts. Six genuine receipts are now stored
+through the API, with one incident for the observed cleanup failure. Durable
+delivery recovered from a real database outage. Dashboard and watchdog remain
+pending. No hosted GitHub workflows or AWS resources are running.
+
+On the prepared laptop, run `bash dev up`, `bash dev api-up`, then open
+[local receipt metadata](http://localhost:8080/v1/receipts). Use `bash dev api-demo`
+to replay the genuine signed examples. See the [API guide](docs/api.md) and
+[milestone e validation](docs/api-validation.md). The React dashboard is next,
+subject to milestone approval.
 
 On this prepared laptop, run `bash dev ci-up`, `bash dev finalizer-up`, then
 `bash dev finalizer-demo` for passing/failing commands, automatic cleanup,
 protected archival, keyless signing and independent verification. See the
 [milestone d validation report](docs/finalizer-validation.md),
 [finalizer guide](docs/finalizer.md), [archive guide](docs/archive.md), and
-[private signing guide](infra/sigstore/README.md). Milestone e awaits confirmation.
+[private signing guide](infra/sigstore/README.md).
 
 For the CLI, run `bash dev cli-demo` after `bash dev cli-prepare` and
 `bash dev kind-up`. See the [CLI guide](docs/cli.md) and
@@ -51,7 +59,8 @@ After `prepare`, `up`, `check`, `demo` and `status` use local assets. Compose ha
 `demo` is a schema demonstration, not cleanup proof: it inserts a synthetic failure
 and paired incident in one transaction, checks the constraints, then rolls both
 back. No synthetic signed receipts are persisted. `finalizer-demo` produces real
-signatures and archived receipts; API/database ingestion is the next milestone.
+signatures and archived receipts; `bash dev deliver` submits them through the
+independently verifying API without re-signing or rewriting archived evidence.
 
 ## What exists
 

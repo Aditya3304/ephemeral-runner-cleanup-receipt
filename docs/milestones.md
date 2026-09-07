@@ -9,14 +9,30 @@ Each completed milestone is demonstrated and requires confirmation before the ne
 | a: foundation | Complete; milestone b approved | Repository, schema/migrations, TLS, restricted database roles and repeatable local commands |
 | b: cleanup CLI | Complete; milestone c approved | Cobra/client-go commands, real kind cleanup, canonical preliminary evidence and offline Sigstore verification |
 | c: guard/coordinator | Complete; milestone d approved | Local job lifecycle, durable coordinator, isolated runners and disabled GitHub adapter |
-| d: signing/finalizer | Complete; awaiting approval for e | Independent observations, private keyless signing, protected archive and verified canonical receipts |
-| e: API | Not started | Chi/pgx verification, sanitization, transactional ingestion and queries |
+| d: signing/finalizer | Complete; milestone e approved | Independent observations, private keyless signing, protected archive and verified canonical receipts |
+| e: API | Complete; awaiting approval for f | Chi/pgx verification, sanitization, atomic receipts/incidents, queries and durable delivery |
 | f: dashboard | Not started | React/Vite/Tailwind/TanStack search/detail/incident UI |
 | g: watchdog | Not started | Missing-finalization recovery and incidents |
 | h: hardening | Not started | End-to-end fault and offline-execution matrix |
 | i: local deployment | Not started | Packaging, backup and rehearsals; AWS remains excluded |
 
-## Milestone d validation and remaining work
+## Milestone e validation and remaining work
+
+Six genuine signed local runs have independently verified API records: five
+cleanup passes and one failure with one linked incident. Concurrent duplicate
+insertion, conflicting versions, tampered signatures, sanitized search/filter
+queries and forced transaction rollback were tested. A real database outage
+preserved the signed output and recovered through durable delivery after an API
+restart. The API's own network namespace permits PostgreSQL and MinIO while
+blocking signing-service and external connectivity.
+
+See [api-validation.md](api-validation.md) and [api.md](api.md). The Windows
+loopback gateway exposes JSON at `http://localhost:8080/v1/receipts`. React UI,
+scheduled watchdog/leases, full-system fault coverage, backup and rehearsal remain
+pending. The user must approve f before dashboard work begins. Hosted GitHub,
+public Sigstore and AWS remain outside the approved runtime scope.
+
+## Historical milestone d validation and deferrals (at its completion)
 
 Six real jobs completed cleanup, trusted observation, encrypted/versioned archive,
 private keyless signing, network-disabled CLI verification and independent object

@@ -12,6 +12,15 @@ build() {
   go test -c -trimpath -o .build/db.test ./db
 }
 case "${1:-help}" in
+  api-build) bash scripts/api-build.sh ;;
+  api-up) bash scripts/api-up.sh ;;
+  api-check) bash scripts/api-test.sh ;;
+  api-demo) python3 scripts/demo-api.py ;;
+  deliver)
+    shift
+    export API_IMAGE="$(cat .build/api-image-id)"
+    docker compose -f compose.api.yaml run --rm --no-deps deliver /usr/local/bin/deliver "${1:-all}"
+    ;;
   finalizer-prepare)
     bash scripts/archive-prepare.sh
     bash scripts/sigstore-prepare.sh
@@ -71,6 +80,11 @@ case "${1:-help}" in
   stop) docker compose stop db ;;
   *)
     echo 'Local database foundation (WSL/Linux). No hosted workflows.'
+    echo 'bash dev api-build Build the API, gateway and durable delivery command offline.'
+    echo 'bash dev api-up    Start the local API at http://localhost:8080/v1/receipts.'
+    echo 'bash dev api-check Verify real signatures and transactions in a separate test DB.'
+    echo 'bash dev api-demo  Ingest genuine samples and test first-delivery DB outage recovery.'
+    echo 'bash dev deliver  Replay published signed outputs, respecting durable retry times.'
     echo 'bash dev prepare  Download pinned setup assets and build tools (internet required).'
     echo 'bash dev up       Start local PostgreSQL and migrate (no downloads).'
     echo 'bash dev check    Test a separate temporary database; preserve the main database.'
