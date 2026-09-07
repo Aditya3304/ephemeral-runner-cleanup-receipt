@@ -10,13 +10,31 @@ Each completed milestone is demonstrated and requires confirmation before the ne
 | b: cleanup CLI | Complete; milestone c approved | Cobra/client-go commands, real kind cleanup, canonical preliminary evidence and offline Sigstore verification |
 | c: guard/coordinator | Complete; milestone d approved | Local job lifecycle, durable coordinator, isolated runners and disabled GitHub adapter |
 | d: signing/finalizer | Complete; milestone e approved | Independent observations, private keyless signing, protected archive and verified canonical receipts |
-| e: API | Complete; awaiting approval for f | Chi/pgx verification, sanitization, atomic receipts/incidents, queries and durable delivery |
-| f: dashboard | Not started | React/Vite/Tailwind/TanStack search/detail/incident UI |
+| e: API | Complete; milestone f approved | Chi/pgx verification, sanitization, atomic receipts/incidents, queries and durable delivery |
+| f: dashboard | Complete; awaiting approval for g | AFTER: React/Vite/Tailwind/TanStack, interactive coverage, search/filters/incidents and fresh verification |
 | g: watchdog | Not started | Missing-finalization recovery and incidents |
 | h: hardening | Not started | End-to-end fault and offline-execution matrix |
 | i: local deployment | Not started | Packaging, backup and rehearsals; AWS remains excluded |
 
-## Milestone e validation and remaining work
+## Milestone f validation and remaining work
+
+AFTER is running at http://localhost:8080/ with seven genuine receipts and one
+open incident. A fresh Kubernetes run was cleaned, independently observed,
+archived, signed, ingested and freshly verified from the browser. All 14 Chromium
+checks passed, including real verification, error states, filters, keyboard access,
+light/dark accessibility scans and narrow-screen reflow.
+
+See [dashboard-validation.md](dashboard-validation.md) and
+[dashboard.md](dashboard.md). The UI includes an interactive five-check map,
+exact artifact references and recorded timeline; summary counts describe only the
+loaded view. All UI assets are local. Analytics charts, live polling and incident
+editing remain outside the approved v1 design.
+
+The next gate is **g: watchdog**. Automatic missing-finalization recovery,
+full-system fault/offline acceptance, backup and rehearsal remain pending.
+Hosted GitHub, public Sigstore and AWS remain excluded. Approval is required before g.
+
+## Historical milestone e validation and deferrals (at its completion)
 
 Six genuine signed local runs have independently verified API records: five
 cleanup passes and one failure with one linked incident. Concurrent duplicate

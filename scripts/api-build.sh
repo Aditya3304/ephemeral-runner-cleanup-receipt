@@ -3,6 +3,7 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 export PATH="/usr/local/go/bin:$PATH" GOTOOLCHAIN=local CGO_ENABLED=0 GOPROXY=off GOSUMDB=off
 mkdir -p .build/api-image
+bash scripts/dashboard-build.sh
 go build -p 2 -trimpath -o .build/api-image/api ./cmd/api
 go build -p 2 -trimpath -o .build/api-image/deliver ./cmd/deliver
 go build -p 2 -trimpath -o .build/api-image/gateway ./cmd/gateway

@@ -12,6 +12,10 @@ build() {
   go test -c -trimpath -o .build/db.test ./db
 }
 case "${1:-help}" in
+  dashboard-prepare) bash scripts/dashboard-prepare.sh ;;
+  dashboard-build) bash scripts/dashboard-build.sh ;;
+  dashboard-check) shift; bash scripts/dashboard-test.sh "$@" ;;
+  dashboard-up) bash dev up; bash scripts/archive-up.sh; bash scripts/api-up.sh ;;
   api-build) bash scripts/api-build.sh ;;
   api-up) bash scripts/api-up.sh ;;
   api-check) bash scripts/api-test.sh ;;
@@ -80,6 +84,10 @@ case "${1:-help}" in
   stop) docker compose stop db ;;
   *)
     echo 'Local database foundation (WSL/Linux). No hosted workflows.'
+    echo 'bash dev dashboard-prepare Cache pinned UI dependencies and browser for initial setup.'
+    echo 'bash dev dashboard-build Build the local dashboard with cached dependencies.'
+    echo 'bash dev dashboard-check Check the running dashboard in Chromium.'
+    echo 'bash dev dashboard-up Start the evidence desk at http://localhost:8080/.'
     echo 'bash dev api-build Build the API, gateway and durable delivery command offline.'
     echo 'bash dev api-up    Start the local API at http://localhost:8080/v1/receipts.'
     echo 'bash dev api-check Verify real signatures and transactions in a separate test DB.'

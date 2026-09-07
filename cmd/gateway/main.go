@@ -26,7 +26,7 @@ func main() {
 		w.WriteHeader(503)
 		w.Write([]byte("{\"error\":\"api_unavailable\"}\n"))
 	}
-	server := &http.Server{Addr: ":8080", Handler: proxy, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 50 * time.Second, IdleTimeout: 30 * time.Second, MaxHeaderBytes: 16 << 10}
+	server := &http.Server{Addr: ":8080", Handler: gatewayHandler(proxy, os.DirFS("/ui")), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 50 * time.Second, IdleTimeout: 30 * time.Second, MaxHeaderBytes: 16 << 10}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	go func() {

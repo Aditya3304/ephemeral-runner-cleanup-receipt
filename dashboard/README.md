@@ -1,7 +1,11 @@
-# Dashboard — milestone f
+# AFTER — Cleanup evidence desk
 
-Scaffold only. React, Vite, Tailwind and TanStack will provide receipt list/detail,
-text search, repository/verdict/date/incident filters and incident visibility.
+A local React interface for verified cleanup receipts. Open http://localhost:8080/
+after `bash dev dashboard-up` from the repository root.
 
-No fabricated receipts or successful verification claims are displayed. Runtime
-assets will be local; the browser talks to the API, never to PostgreSQL.
+The ledger, incidents, interactive coverage map, artifact references, timeline and
+fresh verification use the real Go API. Search and filters are shareable through
+URL parameters. Light/dark appearance is stored locally.
+
+See [the guide](../docs/dashboard.md) and
+[milestone f validation](../docs/dashboard-validation.md).

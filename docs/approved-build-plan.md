@@ -1,6 +1,6 @@
 # Ephemeral Runner Cleanup Receipt — local build proposal
 
-Status: approved by the user on September 7, 2026. Milestones a through e are implemented and validated; confirmation is required before f. Wording describing proposals below records the approved design; current implementation status is maintained in milestones.md and api-validation.md.
+Status: approved by the user on September 7, 2026. Milestones a through f are implemented and validated; confirmation is required before g. Seven genuine receipts and one incident are visible in the local dashboard. The repository's docs/milestones.md and docs/dashboard-validation.md record current progress and validation. Proposal wording below preserves the approved design.
 
 ## Confirmed direction
 
@@ -112,20 +112,20 @@ At every gate, report what works, what was tested, remaining PDF requirements, a
 
 ## Acceptance checklist derived from the PDF
 
-All boxes are currently unverified. Completion requires actual tests and saved evidence. Checks below use the proposed local CI and storage equivalents. Original GitHub/AWS-specific gates are separately listed as deferred; they will not be marked complete based on local tests.
+Checked boxes have saved milestone evidence. Unchecked boxes remain final system acceptance gates, including scenarios with earlier component-level coverage. Checks below use the approved local CI and storage equivalents. Original GitHub/AWS-specific gates remain deferred and are not marked complete from local tests.
 
 - [ ] Successful test job invokes cleanup and produces an honest cleanup verdict.
 - [ ] Failed test job also invokes cleanup.
 - [ ] Namespace, service account, and supported tracked volumes are confirmed absent.
 - [ ] Workspace verification detects no residual paths; deliberately left paths prevent success.
 - [ ] Downloaded archived logs match the signed receipt's SHA-256 digest and cover the complete locally collected job log; gaps prevent success.
-- [ ] CLI verification and dashboard/API verification both succeed for the same genuine receipt.
+- [x] CLI verification and dashboard/API verification both succeed for the same genuine receipt (milestone f).
 - [ ] Duplicate and concurrent finalizations produce one receipt and no duplicate incident.
 - [ ] Tampered receipt, modified evidence, invalid bundle, wrong issuer and wrong signer are rejected before receipt insertion.
 - [ ] Database failure preserves archived objects and schedules recovery; recovery succeeds without duplicates.
 - [ ] Object-store failure prevents a passing receipt and leaves a visible retry/failure path.
 - [ ] Each cleanup failure creates one actionable tracked incident.
-- [ ] Dashboard filters work for repository, verdict, date and incident state.
+- [x] Dashboard filters work for repository, verdict, date and incident state (milestone f).
 
 Additional tests required by the PDF's trust rules and hardening phase:
 
