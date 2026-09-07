@@ -4,8 +4,8 @@ A local, offline-capable cleanup evidence pipeline for disposable Kubernetes CI
 runners. Built with Go, PostgreSQL, a TypeScript guard, a trusted Sigstore finalizer,
 S3-compatible evidence storage and a React dashboard.
 
-**Current milestone: h — the complete local hardening matrix passed.**
-AFTER shows 33 genuine verified receipts and seven cleanup incidents. The WSL
+**Release v0.1.0: milestones a–i are complete.**
+AFTER shows 37 genuine verified receipts and nine cleanup incidents. The WSL
 watchdog recovered missing finalizations and real Kubernetes, MinIO, signing, API,
 and PostgreSQL outages without replaying a job command or duplicating a receipt.
 Sixteen incompatible historical development records remain visible for review;
@@ -20,8 +20,10 @@ Expand **Recovery watch** to inspect recorded retries and open linked receipts.
 The installed service runs while WSL and Docker are available. See the
 [watchdog guide](docs/watchdog.md), [milestone g validation](docs/watchdog-validation.md),
 [milestone h validation](docs/hardening-validation.md), and
-[dashboard guide](docs/dashboard.md). Local packaging, backup, and rehearsal are
-the remaining milestone. No hosted GitHub workflows or AWS resources run.
+[dashboard guide](docs/dashboard.md), plus the
+[release validation](docs/release-validation.md). Start everything with
+`bash dev release-up`; stop it without deleting state using `bash dev release-stop`.
+No hosted GitHub workflows or AWS resources run.
 
 On this prepared laptop, run `bash dev ci-up`, `bash dev finalizer-up`, then
 `bash dev finalizer-demo` for passing/failing commands, automatic cleanup,

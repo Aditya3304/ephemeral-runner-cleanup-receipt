@@ -1,6 +1,6 @@
 # Ephemeral Runner Cleanup Receipt — local build proposal
 
-Status: approved by the user on September 7, 2026. Milestones a through h are implemented and validated; confirmation is required before i. Thirty-three genuine receipts and seven cleanup incidents are visible in the local dashboard; sixteen incompatible historical records are retained for review. The repository's docs/milestones.md and docs/hardening-validation.md record current progress and validation. Proposal wording below preserves the approved design.
+Status: approved and complete on September 7, 2026. Milestones a through i are implemented and validated. Thirty-seven genuine receipts and nine cleanup incidents are visible in the local dashboard; sixteen incompatible historical records are retained for review. The repository's docs/milestones.md and docs/release-validation.md record final progress and validation. Proposal wording below preserves the approved design.
 
 ## Confirmed direction
 
@@ -142,7 +142,7 @@ Additional tests required by the PDF's trust rules and hardening phase:
 - [x] Watchdog recovery survives laptop/service restart and does not duplicate unresolved incidents (milestones g and h).
 - [x] A complete run starts, cleans, signs, archives and verifies with external network access blocked and no runtime downloads (milestone h).
 - [x] No workflow depends on a paid service or enables metered usage that could violate the zero-spend requirement (milestone h).
-- [ ] A tagged local release supports two rehearsals, sample signed receipts, a known-good database backup, and a backup demo recording.
+- [x] A tagged local release supports two rehearsals, sample signed receipts, a known-good database backup, and a backup demo recording (milestone i).
 
 Definition of success for the proposed offline substitution: a complete real local CI run is visible in the dashboard, its keyless signature verifies against the expected local finalizer identity and pinned private Sigstore trust, logs/evidence are retained in the local S3-compatible archive with verified digests and storage protections, observable cleanup absence is confirmed, and failures generate one actionable incident. The entire demonstration works with internet access blocked.
 

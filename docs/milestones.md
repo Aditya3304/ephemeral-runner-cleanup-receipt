@@ -13,10 +13,27 @@ Each completed milestone is demonstrated and requires confirmation before the ne
 | e: API | Complete; milestone f approved | Chi/pgx verification, sanitization, atomic receipts/incidents, queries and durable delivery |
 | f: dashboard | Complete; milestone g approved | AFTER: React/Vite/Tailwind/TanStack, interactive coverage, search/filters/incidents and fresh verification |
 | g: watchdog | Complete; milestone h approved | Persistent WSL recovery, bounded retries, crash/outage reconciliation and recovery visibility |
-| h: hardening | Complete; awaiting approval for i | End-to-end fault, trust, service-outage, offline-execution and browser matrix |
-| i: local deployment | Not started | Packaging, backup and rehearsals; AWS remains excluded |
+| h: hardening | Complete; milestone i approved | End-to-end fault, trust, service-outage, offline-execution and browser matrix |
+| i: local deployment | Complete | Offline start/stop/status package, verified backup/restore, two rehearsals, sample evidence and recording |
 
-## Milestone h validation and remaining work
+## Milestone i validation and completed release
+
+Release `v0.1.0` starts and stops the whole prepared local system without deleting
+state or downloading runtime assets. A 41,994-byte PostgreSQL custom backup was
+restored and identity-checked three times in disposable databases. Two independent
+stopped-to-ready rehearsals each produced one passing receipt and one interrupted
+failure receipt with exactly one incident; all signatures, archived artifacts and
+resource absence checks passed. A real 1.7 MiB Chromium recording and two screenshots
+show the second rehearsal in AFTER with external requests blocked.
+
+The retained release dossier contains tagged source, pinned identities, contract
+hashes, backup proof, both rehearsal reports and passing/failing signed samples.
+See [release-validation.md](release-validation.md) and
+[local-release.md](local-release.md). All approved local acceptance requirements
+are complete. Hosted GitHub Actions, public Sigstore and AWS remain excluded under
+the user's fully local, zero-spend scope.
+
+## Historical milestone h validation
 
 All sixteen local hardening groups passed. Six fresh lifecycle cases produced
 signed, archived, independently verified receipts; the real MinIO, signing issuer,
@@ -31,10 +48,9 @@ that irreversible gap from a temporary outage, disposes only UID-bound resources
 and issues a signed partial receipt with one incident. See
 [hardening-validation.md](hardening-validation.md).
 
-The local ledger now contains 33 verified receipts: 26 pass, three fail and four
-partial, with seven paired incidents. The next gate is **i: local deployment**:
-startup packaging, a tagged release, two rehearsals, backup/restore, retained sample
-evidence and a demo recording. User confirmation is required before milestone i.
+At the milestone h gate, the local ledger contained 33 verified receipts: 26 pass,
+three fail and four partial, with seven paired incidents. Milestone i has since
+completed the release, backup, rehearsal, sample-evidence and recording work.
 
 ## Historical milestone g validation
 
@@ -50,9 +66,9 @@ The dashboard includes recovery states, retained failure reasons and navigation
 to verified receipts. The service is installed by content digest and preserves
 retry budgets across restarts. All runtime components remain on this laptop.
 
-Milestone h has since completed the full system fault/offline acceptance matrix.
-Local packaging, backup and rehearsal remain milestone i. Hosted GitHub, public
-Sigstore and AWS remain excluded.
+Milestone h subsequently completed the full system fault/offline acceptance matrix,
+and milestone i completed local packaging, backup and rehearsal. Hosted GitHub,
+public Sigstore and AWS remain excluded.
 
 ## Historical milestone f validation (at its completion)
 

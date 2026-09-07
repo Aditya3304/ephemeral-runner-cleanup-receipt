@@ -77,8 +77,8 @@ The trusted finalizer remains revision
 Cosign SHA-256 is
 `4629c757b7618056f8ddd7e2625ae9fdd94c0372a65049520bc7d9df9efc7f71`.
 
-Milestone h is complete. Milestone i remains: local startup packaging, a tagged
-release, two rehearsals, a known-good PostgreSQL metadata backup and restore,
-sample evidence retention, and a demo recording. Hosted GitHub Actions, public
-Sigstore, AWS, and Terraform deployment remain excluded by the approved local,
-offline, zero-spend scope. Confirmation is required before milestone i.
+At this gate, milestone i remained: local startup packaging, a tagged release, two
+rehearsals, a known-good PostgreSQL metadata backup and restore, sample evidence
+retention, and a demo recording. That work has since completed. Hosted GitHub
+Actions, public Sigstore, AWS, and Terraform deployment remain excluded by the
+approved local, offline, zero-spend scope.

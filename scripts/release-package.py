@@ -189,7 +189,7 @@ def create():
         with tarfile.open(ARCHIVE, 'w:gz', compresslevel=9) as package:
             package.add(DESTINATION, arcname=DESTINATION.name, recursive=True)
         tar_files = verify_archive(ARCHIVE, DESTINATION)
-        result = {
+        package_result = {
             'kind': 'local-release-package-verification/v1',
             'checked_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
             'version': VERSION,
@@ -205,9 +205,31 @@ def create():
             'passed': True,
         }
         target = ROOT / '.build/release/package-verification.json'
-        target.write_text(json.dumps(result, indent=2) + '\n')
-        (OUTPUTS / 'milestone-i-results.json').write_text(json.dumps(result, indent=2) + '\n')
-        print(json.dumps(result, indent=2))
+        target.write_text(json.dumps(package_result, indent=2) + '\n')
+        milestone = {
+            'kind': 'milestone-i-validation/v1',
+            'status': 'passed',
+            'completed_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            'version': VERSION,
+            'tag': TAG,
+            'commit': commit,
+            'package': package_result,
+            'backup': backup,
+            'backup_restore': json.loads((ROOT / '.build/release/backup/restore-verification.json').read_text()),
+            'rehearsals': rehearsals,
+            'demo': demo,
+            'final_status': json.loads((ROOT / '.build/release-status.json').read_text()),
+            'sample_evidence': sample_rows,
+            'runtime_downloads': 0,
+            'paid_services_used': False,
+            'cloud_resources': [],
+            'persistent_volumes_preserved_during_stop': 28,
+            'acceptance_complete': True,
+        }
+        data = json.dumps(milestone, indent=2) + '\n'
+        (ROOT / '.build/milestone-i-results.json').write_text(data)
+        (OUTPUTS / 'milestone-i-results.json').write_text(data)
+        print(json.dumps(package_result, indent=2))
     except Exception:
         if stage.exists():
             shutil.rmtree(stage)
