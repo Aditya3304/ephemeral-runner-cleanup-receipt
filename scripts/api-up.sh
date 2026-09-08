@@ -4,7 +4,9 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 export API_IMAGE="$(cat .build/api-image-id)"
 python3 scripts/api-config.py
 docker compose -f compose.api.yaml run --rm --no-deps init
-docker compose -f compose.api.yaml up -d api gateway
+extra=()
+if [[ "${API_RECREATE:-}" == 1 ]]; then extra+=(--force-recreate); fi
+docker compose -f compose.api.yaml up -d "${extra[@]}" api gateway
 python3 - <<'PY'
 import time, urllib.request
 for _ in range(30):

@@ -25,6 +25,8 @@ export FINALIZER_IMAGE=$(cat .build/finalizer-image-id)
 docker compose -f compose.finalizer.yaml run --rm --no-deps init-state
 (cd dashboard && npm ci --workspaces=false --ignore-scripts --no-audit --no-fund)
 bash scripts/api-build.sh
+python3 scripts/aws/config-api.py
+export API_RECREATE=1
 bash scripts/api-up.sh
 python3 scripts/aws/install-services.py
 echo 'AWS services ready; source-approved GitHub controller enabled.'
