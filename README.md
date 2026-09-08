@@ -7,7 +7,8 @@ S3-compatible evidence storage and a React dashboard.
 **AWS/GitHub profile:** see [the finals deployment guide](docs/aws-finals.md) for
 real ephemeral GitHub Actions runners on EC2, Amazon S3/KMS evidence storage,
 the credential-preserving operator bridge, costs and teardown. This profile
-does not use Firecracker. The local-release records below describe the original
+does not use Firecracker. [Live AWS validation](docs/aws-validation.md) records
+the genuine GitHub runs, signed receipts and successful host restart. The local-release records below describe the original
 v0.1.0 baseline and are not measurements of the AWS deployment.
 
 **Release v0.1.0: milestones a–i are complete.**
