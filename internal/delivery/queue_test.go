@@ -101,4 +101,44 @@ func TestSixAttemptCap(t *testing.T) {
 	if posts != 6 {
 		t.Fatalf("got %d delivery attempts", posts)
 	}
+	q.RetryRejected = true
+	if _, e := q.Deliver(context.Background(), b); e == nil || posts != 6 {
+		t.Fatal("operator retry bypassed six-attempt cap")
+	}
+}
+
+func TestOperatorRedeliveryPreservesRejectionHistory(t *testing.T) {
+	b, _ := fixture()
+	posts := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			w.Write([]byte(`{"items":[]}`))
+			return
+		}
+		if r.URL.Path == "/v1/attempts" {
+			w.WriteHeader(201)
+			return
+		}
+		posts++
+		if posts == 1 {
+			w.WriteHeader(422)
+			return
+		}
+		w.WriteHeader(201)
+		w.Write([]byte(`{"id":"verified-receipt"}`))
+	}))
+	defer server.Close()
+	q := &Queue{Dir: t.TempDir(), BaseURL: server.URL, Client: server.Client()}
+	s, e := q.Deliver(context.Background(), b)
+	if e == nil || s.Status != "exhausted" || s.Tries != 1 {
+		t.Fatal("rejection not retained")
+	}
+	if _, e = q.Deliver(context.Background(), b); e == nil || posts != 1 {
+		t.Fatal("rejected evidence retried automatically")
+	}
+	q.RetryRejected = true
+	s, e = q.Deliver(context.Background(), b)
+	if e != nil || s.Status != "complete" || s.Tries != 2 || len(s.Failures) != 1 || s.Failures[0].ErrorCode != "invalid_evidence" {
+		t.Fatal("operator recovery lost history", s, e)
+	}
 }
