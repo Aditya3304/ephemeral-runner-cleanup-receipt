@@ -1,0 +1,39 @@
+name: AWS ephemeral runner cleanup proof
+on:
+  workflow_dispatch:
+  push:
+    branches: [aws-github-finals]
+    paths: ['.github/workflows/cleanup-aws.yml', '.github/demo-request.txt']
+permissions:
+  contents: read
+concurrency:
+  group: aws-cleanup-demo
+  cancel-in-progress: false
+jobs:
+  guarded:
+    name: guarded
+    runs-on: proof-gh-${{ github.run_id }}-${{ github.run_attempt }}
+    timeout-minutes: 8
+    steps:
+      - name: Select immutable guard from the approved runner image
+        run: ln -s /opt/guard .guard
+      - name: Start scoped workspace and register native post cleanup
+        uses: ./.guard
+      - name: Check committed source in the disposable workspace
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          git -C "$PROOF_WORKSPACE" init --quiet
+          git -C "$PROOF_WORKSPACE" remote add origin "https://github.com/$SOURCE_REPOSITORY.git"
+          git -C "$PROOF_WORKSPACE" fetch --depth=1 origin "$SOURCE_SHA"
+          git -C "$PROOF_WORKSPACE" checkout --detach FETCH_HEAD
+          test "$(git -C "$PROOF_WORKSPACE" rev-parse HEAD)" = "$SOURCE_SHA"
+          node --check "$PROOF_WORKSPACE/infra/github/entrypoint.mjs"
+          printf 'Disposable demo credential; contains no secret\n' > "$PROOF_CREDENTIALS/demo-token"
+          printf 'GitHub run %s attempt %s executed source %s on AWS\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$SOURCE_SHA"
+      - name: Explain asynchronous external verification
+        if: always()
+        run: echo 'The native action post performs cleanup. The external observer and isolated finalizer act after this runner stops; the signed receipt appears in the AWS dashboard.'

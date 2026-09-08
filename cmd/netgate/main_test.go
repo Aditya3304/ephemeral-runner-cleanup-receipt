@@ -14,7 +14,7 @@ import (
 )
 
 func fixtureOptions() options {
-	return options{strings.Repeat("a", 64), "796b063d-c008-4432-a6aa-891b186535d2", "proof-runner-" + strings.Repeat("b", 32), "10.96.0.1", "172.19.0.2"}
+	return options{strings.Repeat("a", 64), "796b063d-c008-4432-a6aa-891b186535d2", "proof-runner-" + strings.Repeat("b", 32), "10.96.0.1", "172.19.0.2", ""}
 }
 
 // These are canonical -S outputs, including the defaults that caused the first

@@ -22,13 +22,18 @@ import (
 func collectorBinding(l *Ledger) string {
 	data, _ := proof.Canonical(struct {
 		Identity                                                                                                                           proof.Identity `json:"identity"`
+		GitHub                                                                                                                             *GitHubRun     `json:"github,omitempty"`
 		Cluster, ResourceNamespace, ResourceUID, RunnerNamespace, RunnerUID, JobUID, PodName, PodUID, StageUID, RoleUID, BindingUID, Image string
 		Command                                                                                                                            []string
-	}{l.Identity, l.ClusterUID, l.ResourceNamespace, l.ResourceUID, l.RunnerNamespace, l.RunnerUID, l.JobUID, l.PodName, l.PodUID, l.StageUID, l.RoleUID, l.BindingUID, l.Image, l.Command})
+	}{l.Identity, l.GitHub, l.ClusterUID, l.ResourceNamespace, l.ResourceUID, l.RunnerNamespace, l.RunnerUID, l.JobUID, l.PodName, l.PodUID, l.StageUID, l.RoleUID, l.BindingUID, l.Image, l.Command})
 	return proof.Digest(data)
 }
 func collectorArgs(r observer.Request, mode string) []string {
-	return []string{"/usr/local/bin/proof-observe", "--mode", mode, "--run", r.Run, "--pod", r.Pod, "--uid", r.UID, "--sandbox", r.Sandbox, "--binding", r.Binding, "--seconds", strconv.Itoa(r.Seconds)}
+	args := []string{"/usr/local/bin/proof-observe", "--mode", mode, "--run", r.Run, "--pod", r.Pod, "--uid", r.UID, "--sandbox", r.Sandbox, "--binding", r.Binding, "--seconds", strconv.Itoa(r.Seconds)}
+	if r.GitHub {
+		args = append(args, "--github")
+	}
+	return args
 }
 
 type cappedWriter struct {
@@ -77,7 +82,7 @@ func classifyCollectorFailure(mode string, err error, stderr string) error {
 	return wrapped
 }
 func (c *Coordinator) armCollector(ctx context.Context, l *Ledger, sandbox string) error {
-	r := observer.Request{Run: l.Token, Pod: l.PodName, UID: l.PodUID, Sandbox: sandbox, Binding: collectorBinding(l), Seconds: int(l.TimeoutSeconds) + 300}
+	r := observer.Request{GitHub: l.GitHub != nil, Run: l.Token, Pod: l.PodName, UID: l.PodUID, Sandbox: sandbox, Binding: collectorBinding(l), Seconds: int(l.TimeoutSeconds) + 300}
 	if e := r.Validate(); e != nil {
 		return e
 	}
@@ -127,7 +132,7 @@ func (c *Coordinator) collectTrusted(ctx context.Context, l *Ledger) error {
 	if r.Binding != collectorBinding(l) {
 		return terminalCollection(errors.New("collector ledger binding mismatch"))
 	}
-	dir, e := c.runDir(l.Identity.Run)
+	dir, e := c.runDir(l.Token)
 	if e != nil {
 		return e
 	}

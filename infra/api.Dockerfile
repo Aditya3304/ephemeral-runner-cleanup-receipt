@@ -1,4 +1,5 @@
 FROM scratch
+COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY api deliver gateway recoverybridge cosign /usr/local/bin/
 COPY ui /ui
 USER 65532:65532

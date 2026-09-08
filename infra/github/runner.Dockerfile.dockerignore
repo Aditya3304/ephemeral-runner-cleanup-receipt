@@ -1,0 +1,14 @@
+**
+!.build
+!.build/proofctl
+!.build/actions-runner
+!.build/actions-runner/**
+!action
+!action/dist
+!action/dist/**
+!action/action.yml
+!infra
+!infra/github
+!infra/github/entrypoint.mjs
+!examples
+!examples/**
