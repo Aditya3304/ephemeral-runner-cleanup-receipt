@@ -9,6 +9,12 @@ in the repository root. Start with [the AWS guide](../aws-finals.md).
 - [Controlled experiments](outputs/CONTROLLED-EXPERIMENTS.md)
 - [Team responsibilities and stack](TEAM-SPLIT.md)
 - [Observed error rates](OBSERVED-RATES.md)
+- [Architecture and technology stack](outputs/ARCHITECTURE-AND-STACK.png)
+- [Architecture generation prompt and interpretation](outputs/ARCHITECTURE-IMAGE-PROMPT.txt)
+- [Core explanation and presentation script](PROJECT-EXPLAINED.md)
+- [Runner CLI demonstration](RUNNER-CLI-DEMO.md)
+
+![Conceptual architecture and technology stack](outputs/ARCHITECTURE-AND-STACK.png)
 
 ## Reproduction and historical context
 
