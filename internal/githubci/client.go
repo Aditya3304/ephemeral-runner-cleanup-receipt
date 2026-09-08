@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/netip"
 	"os"
 	"strconv"
 	"strings"
@@ -161,6 +162,10 @@ func (c *Client) Pending(ctx context.Context) (Run, Job, error) {
 	return Run{}, Job{}, nil
 }
 func (c *Client) Register(ctx context.Context, r Run, j Job, proxy string) (*coordinator.GitHubRun, string, error) {
+	ip, e := netip.ParseAddr(proxy)
+	if e != nil || !ip.Is4() || !ip.IsPrivate() {
+		return nil, "", errors.New("private IPv4 proxy required before runner registration")
+	}
 	if err := c.validateRun(r); err != nil {
 		return nil, "", err
 	}
@@ -172,6 +177,29 @@ func (c *Client) Register(ctx context.Context, r Run, j Job, proxy string) (*coo
 		Config string `json:"encoded_jit_config"`
 	}
 	name := Label(r.ID, r.Attempt)
+	// A crash after GitHub registration but before durable Kubernetes intent may
+	// leave an offline registration. Reconcile only this exact queued-job name.
+	var existing struct {
+		Total   int      `json:"total_count"`
+		Runners []Runner `json:"runners"`
+	}
+	if err := c.api(ctx, "GET", "/actions/runners?per_page=100", nil, &existing); err != nil {
+		return nil, "", err
+	}
+	if existing.Total > 100 {
+		return nil, "", errors.New("runner registry exceeds bounded demo inventory")
+	}
+	for _, old := range existing.Runners {
+		if old.Name != name {
+			continue
+		}
+		if old.Busy || old.Status != "offline" || j.RunnerID != 0 || j.Status != "queued" {
+			return nil, "", errors.New("existing runner may be active; preserved")
+		}
+		if err := c.api(ctx, "DELETE", fmt.Sprintf("/actions/runners/%d", old.ID), nil, nil); err != nil && err != StatusError(404) {
+			return nil, "", err
+		}
+	}
 	err := c.api(ctx, "POST", "/actions/runners/generate-jitconfig", map[string]any{"name": name, "runner_group_id": 1, "labels": []string{name}, "work_folder": "_work"}, &result)
 	if err != nil {
 		return nil, "", err

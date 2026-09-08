@@ -4,6 +4,12 @@ A local, offline-capable cleanup evidence pipeline for disposable Kubernetes CI
 runners. Built with Go, PostgreSQL, a TypeScript guard, a trusted Sigstore finalizer,
 S3-compatible evidence storage and a React dashboard.
 
+**AWS/GitHub profile:** see [the finals deployment guide](docs/aws-finals.md) for
+real ephemeral GitHub Actions runners on EC2, Amazon S3/KMS evidence storage,
+the credential-preserving operator bridge, costs and teardown. This profile
+does not use Firecracker. The local-release records below describe the original
+v0.1.0 baseline and are not measurements of the AWS deployment.
+
 **Release v0.1.0: milestones a–i are complete.**
 AFTER shows 37 genuine verified receipts and nine cleanup incidents. The WSL
 watchdog recovered missing finalizations and real Kubernetes, MinIO, signing, API,
@@ -23,7 +29,7 @@ The installed service runs while WSL and Docker are available. See the
 [dashboard guide](docs/dashboard.md), plus the
 [release validation](docs/release-validation.md). Start everything with
 `bash dev release-up`; stop it without deleting state using `bash dev release-stop`.
-No hosted GitHub workflows or AWS resources run.
+The original local profile starts no hosted GitHub workflows or AWS resources.
 
 On this prepared laptop, run `bash dev ci-up`, `bash dev finalizer-up`, then
 `bash dev finalizer-demo` for passing/failing commands, automatic cleanup,

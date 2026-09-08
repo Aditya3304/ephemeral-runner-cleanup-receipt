@@ -9,7 +9,7 @@ PREFIX='/repos/Aditya3304/ephemeral-runner-cleanup-receipt'
 def permitted(method,path,body,revision):
     if not path.startswith(PREFIX+'/'):return False
     p=path[len(PREFIX):]
-    if method=='GET':return bool(re.fullmatch(r'/actions/(workflows/cleanup-aws\.yml/runs\?per_page=20|runs/[0-9]+/attempts/[0-9]+(?:/jobs\?per_page=100)?|jobs/[0-9]+|runners/[0-9]+)',p))
+    if method=='GET':return bool(re.fullmatch(r'/actions/(workflows/cleanup-aws\.yml/runs\?per_page=20|runs/[0-9]+/attempts/[0-9]+(?:/jobs\?per_page=100)?|jobs/[0-9]+|runners/[0-9]+|runners\?per_page=100)',p))
     if method=='DELETE':return bool(re.fullmatch(r'/actions/runners/[0-9]+',p))
     if method!='POST' or not isinstance(body,dict):return False
     if p=='/actions/runners/generate-jitconfig':

@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-import pathlib, subprocess
+import pathlib, subprocess, json, ipaddress, shutil
 root=pathlib.Path(__file__).resolve().parents[2]
 revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
-proxy=subprocess.check_output(['docker','network','inspect','kind','--format','{{(index .IPAM.Config 0).Gateway}}'],text=True).strip()
+network=json.loads(subprocess.check_output(['docker','network','inspect','kind'],text=True))[0]
+proxy=next(c['Gateway'] for c in network['IPAM']['Config'] if ipaddress.ip_address(c['Gateway']).version==4)
+public_proxy=pathlib.Path('/usr/local/lib/cleanup-github-proxy.py')
+shutil.copyfile(root/'infra/github/proxy.py',public_proxy)
+public_proxy.chmod(0o644)
 units={
 'cleanup-github-broker.service':f'''[Unit]
 Description=Credential-free GitHub request queue reached only through SSM
@@ -36,8 +40,8 @@ WantedBy=timers.target
 Description=Allowlisted GitHub HTTPS proxy
 After=docker.service network-online.target
 [Service]
-WorkingDirectory={root}
-ExecStart=/usr/bin/python3 {root}/infra/github/proxy.py --bind {proxy}
+WorkingDirectory=/
+ExecStart=/usr/bin/python3 {public_proxy} --bind {proxy}
 User=nobody
 NoNewPrivileges=yes
 PrivateTmp=yes
