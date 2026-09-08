@@ -1,6 +1,17 @@
 name: AWS ephemeral runner cleanup proof
 on:
   workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Controlled experiment: application result versus independently observed cleanup'
+        type: choice
+        options: [normal, test-failure, cleanup-blocked]
+        default: normal
+      observation_seconds:
+        description: 'Pause with disposable files present so you can inspect the live runner'
+        type: choice
+        options: ['45', '15', '0']
+        default: '45'
   push:
     branches: [aws-github-finals]
     paths: ['.github/workflows/cleanup-aws.yml', '.github/demo-request.txt']
@@ -34,6 +45,12 @@ jobs:
           node --check "$PROOF_WORKSPACE/infra/github/entrypoint.mjs"
           printf 'Disposable demo credential; contains no secret\n' > "$PROOF_CREDENTIALS/demo-token"
           printf 'GitHub run %s attempt %s executed source %s on AWS\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$SOURCE_SHA"
+      - name: Run the synthetic order-export experiment
+        shell: bash
+        env:
+          DEMO_SCENARIO: ${{ inputs.scenario || 'normal' }}
+          DEMO_OBSERVATION_SECONDS: ${{ inputs.observation_seconds || '45' }}
+        run: node "$PROOF_WORKSPACE/examples/aws-demo/order-export.mjs"
       - name: Explain asynchronous external verification
         if: always()
         run: echo 'The native action post performs cleanup. The external observer and isolated finalizer act after this runner stops; the signed receipt appears in the AWS dashboard.'
