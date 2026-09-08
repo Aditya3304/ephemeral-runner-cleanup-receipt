@@ -28,7 +28,7 @@ func ValidateArchived(r *Receipt, files map[string][]byte) error {
 	if err := strictCanonical(files["run.json"], MaxReceipt, &l); err != nil {
 		return err
 	}
-	if l.Kind != "local-ci-run/v1" || l.Phase != "complete" || l.Token != r.Identity.Run || l.Identity != r.Identity {
+	if l.ValidateIdentity() != nil || l.Phase != "complete" || l.Identity != r.Identity {
 		return errors.New("archived ledger identity mismatch")
 	}
 	refs := map[string]archive.Ref{}

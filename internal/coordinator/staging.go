@@ -99,7 +99,7 @@ func (c *Coordinator) collectStage(ctx context.Context, l *Ledger) error {
 	if string(stage.UID) != l.StageUID {
 		return terminalCollection(errors.New("staging object UID changed"))
 	}
-	dir, _ := c.runDir(l.Identity.Run)
+	dir, _ := c.runDir(l.Token)
 	if raw := []byte(stage.Data["guard.json"]); len(raw) > 0 {
 		if len(raw) > 16<<10 {
 			return terminalCollection(errors.New("guard status exceeds limit"))
@@ -170,7 +170,7 @@ func (c *Coordinator) collectLogs(ctx context.Context, l *Ledger) error {
 		return err
 	}
 	defer stream.Close()
-	dir, _ := c.runDir(l.Identity.Run)
+	dir, _ := c.runDir(l.Token)
 	f, err := os.CreateTemp(dir, ".logs-*")
 	if err != nil {
 		return err

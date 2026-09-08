@@ -16,6 +16,7 @@ func main() {
 	var r observer.Request
 	var mode string
 	flag.StringVar(&mode, "mode", "collect", "collect, ready, result, or logs")
+	flag.BoolVar(&r.GitHub, "github", false, "also inspect the pinned GitHub runtime directory")
 	flag.StringVar(&r.Run, "run", "", "run ID")
 	flag.StringVar(&r.Pod, "pod", "", "pod name")
 	flag.StringVar(&r.UID, "uid", "", "pod UID")

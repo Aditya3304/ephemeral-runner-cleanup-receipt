@@ -28,7 +28,10 @@ var sandboxPattern = regexp.MustCompile(`^[0-9a-f]{64}$`)
 var uidPattern = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
 var namespacePattern = regexp.MustCompile(`^proof-runner-[0-9a-f]{32}$`)
 
-type options struct{ Sandbox, UID, Namespace, API, Endpoint string }
+type options struct {
+	Sandbox, UID, Namespace, API, Endpoint string
+	Proxy                                  string
+}
 type metadata struct{ Name, UID, Namespace string }
 type inspection struct {
 	Status struct {
@@ -53,6 +56,12 @@ func (o options) validate() error {
 		ip, err := netip.ParseAddr(value)
 		if err != nil || !ip.Is4() || !ip.IsPrivate() || ip.String() != value {
 			return errors.New("API addresses must be canonical private IPv4 literals")
+		}
+	}
+	if o.Proxy != "" {
+		ip, err := netip.ParseAddr(o.Proxy)
+		if err != nil || !ip.Is4() || !ip.IsPrivate() || ip.String() != o.Proxy {
+			return errors.New("proxy must be a canonical private IPv4 literal")
 		}
 	}
 	return nil
@@ -180,9 +189,14 @@ func model(o options) []firewall {
 	reject6 := "-j REJECT --reject-with icmp6-port-unreachable"
 	input4 := []string{"-i lo -j ACCEPT", "-m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT", reject4}
 	input6 := []string{"-i lo -j ACCEPT", "-m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT", reject6}
+	egress := []string{"-o lo -j ACCEPT", "-d " + o.API + "/32 -p tcp -m tcp --dport 443 -j ACCEPT", "-d " + o.Endpoint + "/32 -p tcp -m tcp --dport 6443 -j ACCEPT"}
+	if o.Proxy != "" {
+		egress = append(egress, "-d "+o.Proxy+"/32 -p tcp -m tcp --dport 3128 -j ACCEPT")
+	}
+	egress = append(egress, reject4)
 	return []firewall{
 		{"/usr/sbin/iptables", table{
-			"PROOF-EGRESS":  {"-o lo -j ACCEPT", "-d " + o.API + "/32 -p tcp -m tcp --dport 443 -j ACCEPT", "-d " + o.Endpoint + "/32 -p tcp -m tcp --dport 6443 -j ACCEPT", reject4},
+			"PROOF-EGRESS":  egress,
 			"PROOF-INGRESS": input4,
 		}},
 		{"/usr/sbin/ip6tables", table{"PROOF-EGRESS": {"-o lo -j ACCEPT", reject6}, "PROOF-INGRESS": input6}},
@@ -356,6 +370,7 @@ func main() {
 	flag.StringVar(&o.Namespace, "namespace", "", "owned runner namespace")
 	flag.StringVar(&o.API, "api-ip", "", "local API Service IPv4 address")
 	flag.StringVar(&o.Endpoint, "endpoint-ip", "", "local control-plane IPv4 address")
+	flag.StringVar(&o.Proxy, "proxy-ip", "", "operator GitHub proxy IPv4 address; optional")
 	flag.Parse()
 	if flag.NArg() != 0 {
 		fmt.Fprintln(os.Stderr, "unexpected positional arguments")

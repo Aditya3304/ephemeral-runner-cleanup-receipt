@@ -1,4 +1,4 @@
-// Package archive stores bounded evidence in a configured, TLS-only MinIO archive.
+// Package archive stores bounded evidence in an operator-pinned S3 archive.
 // References never select a network endpoint or credentials.
 package archive
 
@@ -55,6 +55,8 @@ func (r Ref) Validate() error {
 }
 
 type Config struct {
+	Provider       string `json:"provider,omitempty"`
+	SessionFile    string `json:"session_file,omitempty"`
 	Store          string `json:"store"`
 	Endpoint       string `json:"endpoint"`
 	Bucket         string `json:"bucket"`
@@ -101,7 +103,7 @@ func LoadConfig(path string) (Config, error) {
 	if d.Decode(new(any)) != io.EOF {
 		return c, errors.New("trailing archive config JSON")
 	}
-	for _, p := range []*string{&c.CAFile, &c.AccessKeyFile, &c.SecretKeyFile} {
+	for _, p := range []*string{&c.CAFile, &c.AccessKeyFile, &c.SecretKeyFile, &c.SessionFile} {
 		if *p != "" && !filepath.IsAbs(*p) {
 			*p = filepath.Join(filepath.Dir(path), *p)
 		}
@@ -123,28 +125,46 @@ func New(c Config) (*Client, error) {
 	if !componentPattern.MatchString(c.Store) || !componentPattern.MatchString(c.Bucket) || !componentPattern.MatchString(c.Prefix) || c.Region == "" || c.KMSKey == "" || c.MaxObjectBytes <= 0 || c.MaxObjectBytes > MaxObjectBytes {
 		return nil, errors.New("invalid archive configuration or size limit")
 	}
-	ca, err := readFile(c.CAFile, 1<<20)
-	if err != nil {
-		return nil, err
-	}
-	roots := x509.NewCertPool()
-	if !roots.AppendCertsFromPEM(ca) {
-		return nil, errors.New("invalid archive CA")
-	}
-	access, err := readFile(c.AccessKeyFile, 4096)
-	if err != nil {
-		return nil, err
-	}
-	secret, err := readFile(c.SecretKeyFile, 4096)
-	if err != nil {
-		return nil, err
-	}
-	a, s := strings.TrimSpace(string(access)), strings.TrimSpace(string(secret))
-	if a == "" || s == "" {
-		return nil, errors.New("empty archive credentials")
+	var roots *x509.CertPool
+	var creds *credentials.Credentials
+	lookup := minio.BucketLookupPath
+	if c.Provider == "aws" {
+		if u.Host != "s3."+c.Region+".amazonaws.com" || c.CAFile != "" || c.AccessKeyFile != "" || c.SecretKeyFile != "" || !filepath.IsAbs(c.SessionFile) || !awsKMSARN.MatchString(c.KMSKey) {
+			return nil, errors.New("AWS archive requires a regional S3 endpoint, exact KMS key ARN and private session file")
+		}
+		roots, err = x509.SystemCertPool()
+		if err != nil {
+			return nil, err
+		}
+		creds = credentials.New(&sessionProvider{path: c.SessionFile})
+		lookup = minio.BucketLookupDNS
+	} else if c.Provider == "" || c.Provider == "minio" {
+		ca, e := readFile(c.CAFile, 1<<20)
+		if e != nil {
+			return nil, e
+		}
+		roots = x509.NewCertPool()
+		if !roots.AppendCertsFromPEM(ca) {
+			return nil, errors.New("invalid archive CA")
+		}
+		access, e := readFile(c.AccessKeyFile, 4096)
+		if e != nil {
+			return nil, e
+		}
+		secret, e := readFile(c.SecretKeyFile, 4096)
+		if e != nil {
+			return nil, e
+		}
+		a, s := strings.TrimSpace(string(access)), strings.TrimSpace(string(secret))
+		if a == "" || s == "" {
+			return nil, errors.New("empty archive credentials")
+		}
+		creds = credentials.NewStaticV4(a, s, "")
+	} else {
+		return nil, errors.New("unsupported archive provider")
 	}
 	transport := &http.Transport{Proxy: nil, DialContext: (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext, TLSClientConfig: &tls.Config{RootCAs: roots, MinVersion: tls.VersionTLS12}, TLSHandshakeTimeout: 10 * time.Second, ResponseHeaderTimeout: 30 * time.Second, IdleConnTimeout: 30 * time.Second, MaxIdleConns: 4, MaxConnsPerHost: 4, DisableCompression: true}
-	client, err := minio.New(u.Host, &minio.Options{Creds: credentials.NewStaticV4(a, s, ""), Secure: true, Region: c.Region, Transport: transport, BucketLookup: minio.BucketLookupPath, MaxRetries: 2})
+	client, err := minio.New(u.Host, &minio.Options{Creds: creds, Secure: true, Region: c.Region, Transport: transport, BucketLookup: lookup, MaxRetries: 2})
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +204,7 @@ func (c *Client) Put(ctx context.Context, name string, data []byte) (Ref, error)
 	if err != nil {
 		return Ref{}, err
 	}
-	opts := minio.PutObjectOptions{ContentType: contentType, ServerSideEncryption: encryption, DisableMultipart: true}
+	opts := minio.PutObjectOptions{ContentType: contentType, ServerSideEncryption: encryption, DisableMultipart: true, SendContentMd5: c.config.Provider == "aws"}
 	opts.SetMatchETagExcept("*")
 	result, err := c.s3.PutObject(ctx, r.Bucket, r.Key, bytes.NewReader(data), int64(len(data)), opts)
 	if err != nil {

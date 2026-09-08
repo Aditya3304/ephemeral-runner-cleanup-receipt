@@ -166,7 +166,7 @@ func readInputs(dir, run string) (*coordinator.Ledger, map[string][]byte, map[st
 	if err := strictCanonical(data["run.json"], MaxReceipt, &l); err != nil {
 		return nil, nil, nil, "", fmt.Errorf("invalid trusted ledger: %w", err)
 	}
-	if l.Kind != "local-ci-run/v1" || l.Token != run || l.Identity.Run != run || l.Identity.Provider != "local" || l.ResourceNamespace != "proof-"+run || l.RunnerNamespace != "proof-runner-"+run || l.Phase != "complete" || l.CreatedAt.IsZero() || l.UpdatedAt.Before(l.CreatedAt) {
+	if l.ValidateIdentity() != nil || l.Token != run || l.ResourceNamespace != "proof-"+run || l.RunnerNamespace != "proof-runner-"+run || l.Phase != "complete" || l.CreatedAt.IsZero() || l.UpdatedAt.Before(l.CreatedAt) {
 		return nil, nil, nil, "", errors.New("coordinator must publish a complete bound ledger")
 	}
 	if err := l.Identity.Validate(); err != nil {

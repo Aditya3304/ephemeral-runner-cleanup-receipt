@@ -165,7 +165,8 @@ func (r *Receipt) Validate() error {
 			return errors.New("invalid identity text")
 		}
 	}
-	if r.Identity.Provider != "local" || !tokenPattern.MatchString(r.Identity.Run) || r.Binding.ResourceNamespace != "proof-"+r.Identity.Run || r.Binding.RunnerNamespace != "proof-runner-"+r.Identity.Run {
+	token := strings.TrimPrefix(r.Binding.ResourceNamespace, "proof-")
+	if !tokenPattern.MatchString(token) || r.Binding.ResourceNamespace != "proof-"+token || r.Binding.RunnerNamespace != "proof-runner-"+token || (r.Identity.Provider == "local" && r.Identity.Run != token) || (r.Identity.Provider == "github" && !regexp.MustCompile(`^[1-9][0-9]{0,19}$`).MatchString(r.Identity.Run)) {
 		return errors.New("invalid local assignment")
 	}
 	for _, s := range []string{r.Binding.ClusterUID, r.Binding.ResourceUID, r.Binding.RunnerUID, r.Binding.JobUID, r.Binding.PodUID} {

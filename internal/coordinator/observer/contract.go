@@ -21,6 +21,7 @@ var podName = regexp.MustCompile(`^job-[a-z0-9]{5}$`)
 var ErrResultLost = errors.New("collector result irreversibly unavailable")
 
 type Request struct {
+	GitHub  bool   `json:"github,omitempty"`
 	Run     string `json:"run"`
 	Pod     string `json:"pod"`
 	UID     string `json:"pod_uid"`

@@ -114,6 +114,9 @@ func (c *Coordinator) provision(ctx context.Context, l *Ledger) error {
 				}
 				policy.Spec.Egress = append(policy.Spec.Egress, network.NetworkPolicyEgressRule{To: []network.NetworkPolicyPeer{{IPBlock: &network.IPBlock{CIDR: host + bits}}}, Ports: []network.NetworkPolicyPort{{Protocol: ptr(core.ProtocolTCP), Port: ptr(intstr.FromInt32(port))}}})
 			}
+			if l.GitHub != nil {
+				policy.Spec.Egress = append(policy.Spec.Egress, network.NetworkPolicyEgressRule{To: []network.NetworkPolicyPeer{{IPBlock: &network.IPBlock{CIDR: l.GitHub.ProxyIP + "/32"}}}, Ports: []network.NetworkPolicyPort{{Protocol: ptr(core.ProtocolTCP), Port: ptr(intstr.FromInt32(3128))}}})
+			}
 		}
 		if _, err = c.K.NetworkingV1().NetworkPolicies(ns).Create(ctx, policy, meta.CreateOptions{}); apierrors.IsAlreadyExists(err) {
 			live, getErr := c.K.NetworkingV1().NetworkPolicies(ns).Get(ctx, policy.Name, meta.GetOptions{})
@@ -212,7 +215,7 @@ func (c *Coordinator) provision(ctx context.Context, l *Ledger) error {
 	if _, err = c.K.CoreV1().ConfigMaps(l.RunnerNamespace).Create(ctx, &core.ConfigMap{ObjectMeta: meta.ObjectMeta{Name: "assignment", Namespace: l.RunnerNamespace, Labels: labels(l)}, Immutable: ptr(true), Data: map[string]string{"assignment.json": string(assignmentJSON), "kubeconfig": kubeconfig}}, meta.CreateOptions{}); err != nil && !apierrors.IsAlreadyExists(err) {
 		return err
 	}
-	dir, _ := c.runDir(l.Identity.Run)
+	dir, _ := c.runDir(l.Token)
 	if _, cancelErr := os.Stat(filepath.Join(dir, "cancel.requested")); cancelErr == nil {
 		l.CancelRequested = true
 		l.Phase = "collecting"
@@ -227,6 +230,16 @@ func (c *Coordinator) provision(ctx context.Context, l *Ledger) error {
 		return err
 	}
 	job := c.job(l)
+	if l.GitHub != nil {
+		if len(c.RunnerConfig) == 0 || len(c.RunnerConfig) > 64<<10 {
+			return errors.New("bounded private GitHub JIT configuration required")
+		}
+		secret := &core.Secret{ObjectMeta: meta.ObjectMeta{Name: "github-jit", Namespace: l.RunnerNamespace, Labels: labels(l)}, Immutable: ptr(true), Data: map[string][]byte{"config": []byte(c.RunnerConfig)}}
+		if _, e := c.K.CoreV1().Secrets(l.RunnerNamespace).Create(ctx, secret, meta.CreateOptions{}); e != nil {
+			return e
+		}
+		c.configureGitHubJob(job, l)
+	}
 	created, err := c.K.BatchV1().Jobs(l.RunnerNamespace).Create(ctx, job, meta.CreateOptions{})
 	if apierrors.IsAlreadyExists(err) {
 		created, err = c.K.BatchV1().Jobs(l.RunnerNamespace).Get(ctx, "job", meta.GetOptions{})

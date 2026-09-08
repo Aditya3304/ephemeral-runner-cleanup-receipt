@@ -189,7 +189,11 @@ func (c *Coordinator) ensureGateWith(ctx context.Context, l *Ledger, pod *core.P
 	if err != nil || sandbox == "" {
 		return err
 	}
-	_, err = run(ctx, "exec", gateNode, "/usr/local/bin/proof-netgate", "--sandbox", sandbox, "--pod-uid", l.PodUID, "--namespace", l.RunnerNamespace, "--api-ip", apiIP.String(), "--endpoint-ip", endpoint)
+	gateArgs := []string{"exec", gateNode, "/usr/local/bin/proof-netgate", "--sandbox", sandbox, "--pod-uid", l.PodUID, "--namespace", l.RunnerNamespace, "--api-ip", apiIP.String(), "--endpoint-ip", endpoint}
+	if l.GitHub != nil {
+		gateArgs = append(gateArgs, "--proxy-ip", l.GitHub.ProxyIP)
+	}
+	_, err = run(ctx, gateArgs...)
 	if err != nil {
 		var exit *exec.ExitError
 		if errors.As(err, &exit) && exit.ExitCode() == 75 {

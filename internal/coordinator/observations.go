@@ -75,7 +75,7 @@ func observations(l *Ledger, ledgerData []byte, result *observer.Result) (*Obser
 	if e := strict(ledgerData, &decoded); e != nil {
 		return nil, e
 	}
-	if !reflect.DeepEqual(l, &decoded) || l.Phase != "complete" || l.Identity.Provider != "local" {
+	if !reflect.DeepEqual(l, &decoded) || l.Phase != "complete" || l.ValidateIdentity() != nil {
 		return nil, errors.New("observations require the exact completed local ledger")
 	}
 	o := &Observations{Kind: "local-ci-observations/v1", Identity: l.Identity, LedgerDigest: proof.Digest(ledgerData), LogsDigest: l.LogsDigest, LogsBytes: l.LogsBytes, EvidenceDigest: l.EvidenceDigest, GuardDigest: l.GuardDigest, Collector: result, Coverage: map[string]proof.Observation{}}
@@ -86,8 +86,17 @@ func observations(l *Ledger, ledgerData []byte, result *observer.Result) (*Obser
 		o.Coverage["resources"] = proof.Observation{Status: "verified", Observer: "trusted", Reason: "Coordinator confirmed assigned namespace absent using pinned cluster and namespace UIDs; runner profile cannot provision volumes"}
 	}
 	disposed := l.RunnerAbsent && l.RunnerUID != "" && l.PodUID != "" && l.JobUID != "" && l.ClusterUID != "" && l.RoleAbsent && l.BindingAbsent && l.RoleUID != "" && l.BindingUID != ""
+	if l.GitHub != nil {
+		disposed = disposed && l.GitHubAssignmentConfirmed && l.GitHubRunnerAbsent && !l.GitHubAssignmentMismatch
+		if l.GitHubAssignmentMismatch {
+			o.Coverage["runner_disposal"] = proof.Observation{Status: "failed", Observer: "trusted", Reason: "GitHub API assignment did not match the operator-bound runner and source revision"}
+		}
+	}
 	if disposed {
 		o.Coverage["runner_disposal"] = proof.Observation{Status: "verified", Observer: "trusted", Reason: "Coordinator confirmed runner namespace and run-scoped cluster RBAC absent after UID-bound disposal"}
+		if l.GitHub != nil {
+			o.Coverage["runner_disposal"] = proof.Observation{Status: "verified", Observer: "trusted", Reason: "Coordinator confirmed GitHub job assignment, runner registration absent, and UID-bound Kubernetes runner/RBAC disposal"}
+		}
 	}
 	if result != nil {
 		if e := result.Validate(); e != nil {
@@ -146,7 +155,7 @@ func ValidateObservations(data []byte, l *Ledger, ledgerData []byte) (*Observati
 	return &o, nil
 }
 func (c *Coordinator) publishObservations(l *Ledger) error {
-	dir, e := c.runDir(l.Identity.Run)
+	dir, e := c.runDir(l.Token)
 	if e != nil {
 		return e
 	}

@@ -68,6 +68,14 @@ func inspectWorkspace(r Request) (Finding, Finding) {
 		return missing, missing
 	}
 	defer volume.Close()
+	if r.GitHub {
+		// Includes the Actions work tree, diagnostics and registration credentials.
+		// Inspect only the fixed root in the UID-pinned volume, never a job path.
+		runtime := absentDirectory(volume, "github-runtime")
+		if runtime.Status != "verified" {
+			return runtime, runtime
+		}
+	}
 	root, err := openChild(volume, "proof-"+r.Run, unix.O_RDONLY|unix.O_DIRECTORY)
 	if errors.Is(err, unix.ENOENT) {
 		f := Finding{"verified", "Run directory absent within the existing pinned emptyDir after termination"}

@@ -24,10 +24,13 @@ import (
 )
 
 type Coordinator struct {
-	K      kubernetes.Interface
-	Config *rest.Config
-	Root   string
-	Out    io.Writer
+	GitHub       *GitHubRun
+	RunnerConfig string
+	VerifyGitHub func(context.Context, *Ledger) error
+	K            kubernetes.Interface
+	Config       *rest.Config
+	Root         string
+	Out          io.Writer
 }
 
 func Connect(kubeconfig, root string) (*Coordinator, error) {
@@ -89,14 +92,23 @@ func (c *Coordinator) Start(ctx context.Context, id proof.Identity, image string
 			}
 		}
 	}
-	id.Provider = "local"
-	id.Run = "pending"
+	if c.GitHub == nil {
+		id.Provider = "local"
+		id.Run = "pending"
+	} else if id.Provider != "github" {
+		return nil, errors.New("GitHub runner requires GitHub identity")
+	}
 	state, err := proof.NewState(id)
 	if err != nil {
 		return nil, err
 	}
-	id.Run = state.Token
-	l := &Ledger{Kind: "local-ci-run/v1", Identity: id, Token: state.Token, ResourceNamespace: state.Namespace, RunnerNamespace: "proof-runner-" + state.Token, Image: image, Command: command, TimeoutSeconds: int64(timeout / time.Second), Phase: "provisioning", CreatedAt: time.Now().UTC(), EvidenceStatus: "missing", LogsStatus: "missing", Errors: []string{}}
+	if c.GitHub == nil {
+		id.Run = state.Token
+	}
+	l := &Ledger{Kind: "local-ci-run/v1", GitHub: c.GitHub, Identity: id, Token: state.Token, ResourceNamespace: state.Namespace, RunnerNamespace: "proof-runner-" + state.Token, Image: image, Command: command, TimeoutSeconds: int64(timeout / time.Second), Phase: "provisioning", CreatedAt: time.Now().UTC(), EvidenceStatus: "missing", LogsStatus: "missing", Errors: []string{}}
+	if err = l.ValidateIdentity(); err != nil {
+		return nil, err
+	}
 	if err = c.publish(l); err != nil {
 		return l, err
 	}
@@ -104,7 +116,7 @@ func (c *Coordinator) Start(ctx context.Context, id proof.Identity, image string
 	if err = c.provision(ctx, l); err != nil {
 		c.problem(l, "provisioning-incomplete", err)
 		if ctx.Err() != nil {
-			cancelErr := c.RequestCancel(l.Identity.Run)
+			cancelErr := c.RequestCancel(l.Token)
 			l.CancelRequested = cancelErr == nil
 			err = errors.Join(err, cancelErr)
 		}
@@ -198,11 +210,11 @@ func (c *Coordinator) monitor(caller context.Context, l *Ledger) error {
 	var nextSignal time.Time
 	for {
 		if caller.Err() != nil && !l.CancelRequested {
-			if err := c.RequestCancel(l.Identity.Run); err != nil {
+			if err := c.RequestCancel(l.Token); err != nil {
 				return err
 			}
 		}
-		dir, _ := c.runDir(l.Identity.Run)
+		dir, _ := c.runDir(l.Token)
 		if _, err := os.Stat(filepath.Join(dir, "cancel.requested")); err == nil && !l.CancelRequested {
 			l.CancelRequested = true
 			if err = c.save(l); err != nil {
@@ -254,6 +266,13 @@ func retryableCollection(err error) bool {
 }
 
 func (c *Coordinator) finishCollection(ctx context.Context, l *Ledger) error {
+	if l.GitHub != nil {
+		if c.VerifyGitHub == nil {
+			c.problem(l, "github-verifier-unavailable", nil)
+		} else if err := c.VerifyGitHub(ctx, l); err != nil {
+			c.problem(l, "github-verification-incomplete", err)
+		}
+	}
 	var retryErrors []error
 	if err := c.collectStage(ctx, l); err != nil {
 		c.problem(l, "staging", err)
