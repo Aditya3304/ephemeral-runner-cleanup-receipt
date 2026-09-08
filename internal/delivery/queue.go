@@ -27,6 +27,7 @@ type State struct {
 	Failures    []api.Attempt    `json:"failures"`
 }
 type Queue struct {
+	RetryRejected       bool // Explicit operator repair; never resets attempts or failures.
 	Dir, BaseURL, Token string
 	Client              *http.Client
 	Now                 func() time.Time
@@ -189,6 +190,10 @@ func (q *Queue) Deliver(ctx context.Context, data []byte) (*State, error) {
 	// Reconcile ambiguous commits even after the sixth try or before retry due.
 	if q.reconcile(ctx, s) {
 		return s, save(path, s)
+	}
+	if s.Status == "exhausted" && q.RetryRejected && s.Tries < 6 {
+		s.Status = "retry"
+		s.NextRetryAt = nil
 	}
 	if s.Status == "exhausted" || s.Tries >= 6 {
 		return s, errors.New("delivery exhausted; archives retained")

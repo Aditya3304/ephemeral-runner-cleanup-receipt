@@ -92,7 +92,10 @@ func (v *Verifier) Verify(ctx context.Context, result finalizer.Result) (*Verifi
 var identifier = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._/-]{0,254}$`)
 
 func validIdentity(id proof.Identity) bool {
-	return id.Validate() == nil && id.Provider == "local" && identifier.MatchString(id.Repository) && identifier.MatchString(id.Job) && regexp.MustCompile(`^[0-9a-f]{32}$`).MatchString(id.Run)
+	if id.Validate() != nil || !identifier.MatchString(id.Repository) || !identifier.MatchString(id.Job) {
+		return false
+	}
+	return (id.Provider == "local" && regexp.MustCompile(`^[0-9a-f]{32}$`).MatchString(id.Run)) || (id.Provider == "github" && regexp.MustCompile(`^[1-9][0-9]{0,19}$`).MatchString(id.Run))
 }
 func sanitizedCoverage(r finalizer.Receipt) map[string]proof.Observation {
 	c := map[string]proof.Observation{}

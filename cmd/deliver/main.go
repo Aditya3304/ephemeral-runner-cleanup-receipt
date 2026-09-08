@@ -16,6 +16,7 @@ import (
 )
 
 func main() {
+	retryRejected := flag.Bool("retry-rejected", false, "Operator retry after repairing a rejection; retains previous failures and the six-attempt budget")
 	flag.Parse()
 	if flag.NArg() != 1 {
 		os.Stderr.WriteString("Usage: deliver RESULT_PATH (or all)\n")
@@ -27,6 +28,7 @@ func main() {
 	}
 	q := &delivery.Queue{Dir: "/delivery", BaseURL: "http://api:8080", Token: strings.TrimSpace(string(token)), Client: &http.Client{Timeout: 50 * time.Second, Transport: &http.Transport{Proxy: nil}, CheckRedirect: func(*http.Request, []*http.Request) error { return errors.New("redirect forbidden") }}}
 	paths := []string{flag.Arg(0)}
+	q.RetryRejected = *retryRejected
 	if paths[0] == "all" {
 		paths, e = filepath.Glob("/input/*/result.json")
 		if e != nil {
