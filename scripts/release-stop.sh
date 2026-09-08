@@ -6,6 +6,7 @@ exec 9>.build/release-lifecycle.lock
 flock -w 30 9 || { echo 'Another release lifecycle command is active.' >&2; exit 1; }
 
 systemctl --user stop cleanup-receipt-watchdog.service 2>/dev/null || true
+systemctl --user stop cleanup-receipt-github-watchdog.service 2>/dev/null || true
 if [[ -s .build/api-image-id ]]; then
   export API_IMAGE="$(cat .build/api-image-id)"
   docker compose -f compose.api.yaml stop gateway api

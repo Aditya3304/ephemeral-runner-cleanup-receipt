@@ -43,7 +43,7 @@ func (s *Store) Ingest(ctx context.Context, v *Verified) (Commit, error) {
 	}()
 	err = tx.QueryRow(ctx, `INSERT INTO evidence.receipts
  (provider,repository_id,repository,workflow,run_id,run_attempt,job_id,job_name,source_revision,verdict,started_at,completed_at,finalized_at,signature_state,signer_issuer,signer_identity,trust_root_sha256,receipt_object,bundle_object,log_objects,coverage,resource_summary)
- VALUES ($1,$2,$2,'Local CI',$3,$4,$5,$5,$6,$7,$8,$9,$10,'verified',$11,$12,$13,$14,$15,$16,$17,$18)
+ VALUES ($1,$2,$2,CASE WHEN $1='github' THEN 'GitHub Actions' ELSE 'Local CI' END,$3,$4,$5,$5,$6,$7,$8,$9,$10,'verified',$11,$12,$13,$14,$15,$16,$17,$18)
  ON CONFLICT ON CONSTRAINT receipts_run_identity DO NOTHING RETURNING id::text`, id.Provider, id.Repository, id.Run, id.Attempt, id.Job, id.Revision, r.Verdict, r.StartedAt, r.CompletedAt, r.FinalizedAt, r.Finalizer.Issuer, r.Finalizer.Identity, r.Finalizer.TrustRootSHA256, jsonBytes(v.Result.Receipt), jsonBytes(v.Result.Bundle), jsonBytes(r.LogObjects), jsonBytes(sanitizedCoverage(r)), jsonBytes(map[string]any{"evidence_status": r.EvidenceStatus, "finalizer_revision": r.Finalizer.Revision, "resource_namespace": r.Binding.ResourceNamespace, "runner_namespace": r.Binding.RunnerNamespace})).Scan(&out.ID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		// A second statement obtains a fresh READ COMMITTED snapshot after waiting

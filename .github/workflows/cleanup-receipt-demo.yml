@@ -1,0 +1,61 @@
+name: Cleanup receipt GitHub demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: Evidence scenario (command failure is not cleanup failure)
+        type: choice
+        default: normal
+        options: [normal, command-failure, cleanup-failure, missing-post]
+
+# No archive, signing, API-ingestion or collector credentials enter this job.
+# The independently installed watchdog polls this workflow even without a post.
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    name: cleanup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SCENARIO: ${{ inputs.scenario }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Prepare disposable job cluster and guard
+        if: inputs.scenario != 'missing-post'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/prepare-cli.sh
+          bash scripts/kind-up.sh
+          python3 scripts/github-demo-assignment.py
+      - name: Register cleanup post hook
+        if: inputs.scenario != 'missing-post'
+        uses: ./action
+        id: guard
+      - name: Exercise the job
+        if: inputs.scenario != 'missing-post'
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'temporary build output\n' > "$PROOF_WORKSPACE/build.txt"
+          printf 'fake demo credential; not a real secret\n' > "$PROOF_CREDENTIALS/demo.txt"
+          case "$SCENARIO" in
+            command-failure) exit 17 ;;
+            cleanup-failure)
+              # An intentionally blocked namespaced resource makes cleanup fail.
+              kubectl --kubeconfig "$PROOF_KUBECONFIG" -n "$PROOF_NAMESPACE" create configmap blocked-demo --from-literal=demo=true
+              kubectl --kubeconfig "$PROOF_KUBECONFIG" -n "$PROOF_NAMESPACE" patch configmap blocked-demo --type=merge -p '{"metadata":{"finalizers":["demo.cleanup-receipt/hold"]}}'
+              ;;
+          esac
+      - name: Simulate a lost post hook
+        if: inputs.scenario == 'missing-post'
+        run: echo 'Intentionally no guard artifact. The external watchdog must still finalize this run.'

@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """Install a pinned local operator binary; never execute checkout scripts at runtime."""
 import hashlib,json,os,pathlib,subprocess,sys
+import argparse
+parser=argparse.ArgumentParser()
+parser.add_argument('--service',action='store_true')
+parser.add_argument('--github',type=pathlib.Path,help='Operator-owned GitHub collection policy JSON')
+args=parser.parse_args()
+github=json.loads(args.github.read_text()) if args.github else None
+profile='github-' if github else ''
+service='cleanup-receipt-'+profile+'watchdog.service'
 root=pathlib.Path(__file__).resolve().parent.parent
 build=root/'.build'
 
@@ -19,7 +27,7 @@ for kind,image in images.items():
  # A retained tag keeps Docker's local manifest reachable after api:local moves.
  # Execution still uses the exact content digest recorded in the installation.
  subprocess.run(['docker','tag',image,'cleanup-receipt/watchdog-'+kind.replace('_image','')+':'+image[7:]],check=True)
-fingerprint=hashlib.sha256((digest(binary)+digest(policy)+json.dumps(images,sort_keys=True)).encode()).hexdigest()
+fingerprint=hashlib.sha256((digest(binary)+digest(policy)+json.dumps(images,sort_keys=True)+json.dumps(github,sort_keys=True)).encode()).hexdigest()
 target=build/'watchdog-install'/fingerprint
 target.mkdir(parents=True,exist_ok=True)
 for source,name in [(binary,'watchdog'),(policy,'finalizer.json')]:
@@ -27,21 +35,28 @@ for source,name in [(binary,'watchdog'),(policy,'finalizer.json')]:
  if dest.exists() and digest(dest)!=digest(source):raise SystemExit('Installed operator artifact changed; investigate before reinstalling')
  if not dest.exists():dest.write_bytes(source.read_bytes())
 os.chmod(target/'watchdog',0o700)
+# Public policy paths/hashes, not credentials; readable through a read-only
+# file bind mount by the non-root finalizer even with an operator umask of 0077.
+os.chmod(target/'finalizer.json',0o644)
 config={'root':str(root),'state':str(build/'watchdog-state'),'finalizer_config':str(target/'finalizer.json'),**images,'files':{str(target/name):digest(target/name) for name in ['watchdog','finalizer.json']}}
+if github:
+ config['github']=github
+ api=json.loads((build/'api-config.json').read_text())
+ if github['repository']!=api['repository']:raise SystemExit('GitHub repository must match the API repository allowlist')
 configpath=target/'config.json'
 expected=json.dumps(config,indent=2)+'\n'
 if configpath.exists() and configpath.read_text()!=expected:raise SystemExit('Installed configuration differs')
 configpath.write_text(expected)
-(build/'watchdog-current.json').write_text(json.dumps({'binary':str(target/'watchdog'),'config':str(configpath)},indent=2)+'\n')
+(build/(profile+'watchdog-current.json')).write_text(json.dumps({'binary':str(target/'watchdog'),'config':str(configpath)},indent=2)+'\n')
 if '--service' in sys.argv:
  unitdir=pathlib.Path.home()/'.config/systemd/user'
  unitdir.mkdir(parents=True,exist_ok=True)
- unit=unitdir/'cleanup-receipt-watchdog.service'
+ unit=unitdir/service
  if unit.exists() and not unit.read_text().startswith('# Managed by cleanup-receipt watchdog'):raise SystemExit('Refusing to replace an unrelated unit')
  def quote(s):return '"'+str(s).replace('\\','\\\\').replace('"','\\"').replace('%','%%')+'"'
  unit.write_text('''# Managed by cleanup-receipt watchdog
 [Unit]
-Description=Local cleanup receipt recovery watchdog
+Description=Cleanup receipt recovery watchdog
 
 [Service]
 Type=simple
@@ -59,7 +74,7 @@ Environment=GOMEMLIMIT=512MiB GOMAXPROCS=2
 WantedBy=default.target
 ''')
  subprocess.run(['systemctl','--user','daemon-reload'],check=True)
- subprocess.run(['systemctl','--user','enable','cleanup-receipt-watchdog.service'],check=True)
- subprocess.run(['systemctl','--user','restart','cleanup-receipt-watchdog.service'],check=True)
- print('Local watchdog service enabled. It reconciles at startup and every five minutes.')
+ subprocess.run(['systemctl','--user','enable',service],check=True)
+ subprocess.run(['systemctl','--user','restart',service],check=True)
+ print(service+' enabled. It reconciles at startup and every five minutes.')
 else:print('Pinned watchdog installed for manual validation; service not yet enabled.')

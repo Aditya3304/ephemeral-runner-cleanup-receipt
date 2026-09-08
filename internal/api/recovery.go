@@ -10,7 +10,7 @@ import (
 )
 
 func validRecovery(a watchdog.Report) bool {
-	if !validIdentity(a.Identity) || a.Identity.Provider != "local" || a.Number < 1 || a.Number > 6 {
+	if !validIdentity(a.Identity) || a.Number < 1 || a.Number > 6 {
 		return false
 	}
 	switch a.Status {

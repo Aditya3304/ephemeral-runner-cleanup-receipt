@@ -114,6 +114,28 @@
       ]
     }
   },
+  "allOf": [{
+    "if": {"properties": {"identity": {"properties": {"provider": {"const": "github"}}}}},
+    "then": {"properties": {
+      "verdict": {"enum": ["partial", "fail"]},
+      "binding": {"properties": {
+        "cluster_uid": {"const": ""}, "resource_namespace": {"const": ""},
+        "resource_uid": {"const": ""}, "runner_namespace": {"const": ""},
+        "runner_uid": {"const": ""}, "pod_uid": {"const": ""},
+        "job_uid": {"pattern": "^([1-9][0-9]{0,18})?$"}
+      }},
+      "coverage": {"properties": {
+        "workspace": {"properties": {"observer": {"enum": ["job", "none"]}}},
+        "credentials": {"properties": {"observer": {"enum": ["job", "none"]}}},
+        "resources": {"properties": {"observer": {"enum": ["job", "none"]}}},
+        "runner_disposal": {"properties": {"observer": {"const": "none"}, "status": {"const": "unobservable"}}}
+      }}
+    }},
+    "else": {"properties": {"binding": {"properties": {
+      "resource_namespace": {"pattern": "^proof-[0-9a-f]{32}$"},
+      "runner_namespace": {"pattern": "^proof-runner-[0-9a-f]{32}$"}
+    }}}}
+  }],
   "$defs": {
     "identity": {
       "type": "object",
@@ -128,7 +150,7 @@
       ],
       "properties": {
         "provider": {
-          "const": "local"
+          "enum": ["local", "github"]
         },
         "repository": {
           "type": "string",
@@ -137,9 +159,9 @@
         },
         "run_id": {
           "type": "string",
-          "minLength": 32,
+          "minLength": 1,
           "maxLength": 32,
-          "pattern": "^[0-9a-f]{32}$"
+          "pattern": "^([0-9a-f]{32}|[1-9][0-9]{0,18})$"
         },
         "run_attempt": {
           "type": "integer",
@@ -157,7 +179,16 @@
           "maxLength": 64,
           "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$"
         }
-      }
+      },
+      "allOf": [{
+        "if": {"properties": {"provider": {"const": "local"}}},
+        "then": {"properties": {"run_id": {"pattern": "^[0-9a-f]{32}$"}}},
+        "else": {"properties": {
+          "run_id": {"pattern": "^[1-9][0-9]{0,18}$"},
+          "repository": {"pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+          "job_id": {"pattern": "^[A-Za-z_][A-Za-z0-9_-]{0,68}$"}
+        }}
+      }]
     },
     "archiveRef": {
       "type": "object",
@@ -279,9 +310,9 @@
         },
         "resource_namespace": {
           "type": "string",
-          "minLength": 38,
+          "minLength": 0,
           "maxLength": 38,
-          "pattern": "^proof-[0-9a-f]{32}$"
+          "pattern": "^(proof-[0-9a-f]{32})?$"
         },
         "resource_uid": {
           "type": "string",
@@ -290,9 +321,9 @@
         },
         "runner_namespace": {
           "type": "string",
-          "minLength": 45,
+          "minLength": 0,
           "maxLength": 45,
-          "pattern": "^proof-runner-[0-9a-f]{32}$"
+          "pattern": "^(proof-runner-[0-9a-f]{32})?$"
         },
         "runner_uid": {
           "type": "string",

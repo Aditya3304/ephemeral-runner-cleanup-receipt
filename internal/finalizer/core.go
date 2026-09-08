@@ -15,6 +15,7 @@ import (
 
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/archive"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/coordinator"
+	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/githubrun"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/proof"
 	"golang.org/x/sys/unix"
 )
@@ -163,6 +164,21 @@ func readInputs(dir, run string) (*coordinator.Ledger, map[string][]byte, map[st
 		snaps[name] = snapshot{SHA256: proof.Digest(b), Size: int64(len(b)), Status: "present"}
 	}
 	var l coordinator.Ledger
+	var envelope struct {
+		Kind string `json:"kind"`
+	}
+	_ = json.Unmarshal(data["run.json"], &envelope)
+	if envelope.Kind == githubrun.Kind {
+		g, err := githubrun.Parse(data["run.json"])
+		if err != nil {
+			return nil, nil, nil, "", err
+		}
+		if githubrun.Directory(g.Identity) != run || githubrun.ValidateFiles(g, data) != nil || !bytes.Equal(ready, data["finalization-ready.json"]) || !bytes.Equal(ready, githubrun.Ready(data)) {
+			return nil, nil, nil, "", errors.New("GitHub publication binding mismatch")
+		}
+		b, err := proof.Canonical(snaps)
+		return githubLedger(g), data, snaps, proof.Digest(b), err
+	}
 	if err := strictCanonical(data["run.json"], MaxReceipt, &l); err != nil {
 		return nil, nil, nil, "", fmt.Errorf("invalid trusted ledger: %w", err)
 	}
@@ -384,6 +400,9 @@ func boundedReason(s string) string {
 	return string(out)
 }
 func buildReceipt(l *coordinator.Ledger, input map[string][]byte, s *retryState) (*Receipt, error) {
+	if l.Kind == githubrun.Kind {
+		return buildGitHubReceipt(input, s)
+	}
 	r := &Receipt{Kind: "cleanup-receipt/v1", Identity: l.Identity, Binding: Binding{l.ClusterUID, l.ResourceNamespace, l.ResourceUID, l.RunnerNamespace, l.RunnerUID, l.JobUID, l.PodUID, proof.Digest(input["run.json"])}, Finalizer: s.Policy, StartedAt: l.CreatedAt, CompletedAt: l.UpdatedAt, FinalizedAt: s.FinalizedAt, EvidenceStatus: "missing", Coverage: map[string]proof.Observation{}, Objects: map[string]archive.Ref{}, LogObjects: []archive.Ref{}}
 	for _, k := range components {
 		r.Coverage[k] = proof.Observation{Status: "unobservable", Observer: "none", Reason: "No valid independent observation available"}

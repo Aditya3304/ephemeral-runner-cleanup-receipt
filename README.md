@@ -23,7 +23,9 @@ The installed service runs while WSL and Docker are available. See the
 [dashboard guide](docs/dashboard.md), plus the
 [release validation](docs/release-validation.md). Start everything with
 `bash dev release-up`; stop it without deleting state using `bash dev release-stop`.
-No hosted GitHub workflows or AWS resources run.
+The local release remains offline-capable. An opt-in, dispatchable
+[GitHub demo and trusted collector](docs/github.md) now feed GitHub runs through
+the same signing, archive, API and recovery pipeline. No AWS resources are created.
 
 On this prepared laptop, run `bash dev ci-up`, `bash dev finalizer-up`, then
 `bash dev finalizer-demo` for passing/failing commands, automatic cleanup,
@@ -111,10 +113,11 @@ The runtime API mounts only `api-secrets`, never administrative secrets or the
 database server private key. It cannot update/delete receipts, delete incidents,
 create tables, administer users, or change Goose migration history.
 
-The local-only scope replaces live GitHub execution with real local Kubernetes
-jobs, public Sigstore with a private instance, and AWS S3 with local MinIO. GitHub
-is a source publication destination. GitHub/AWS live validation is explicitly
-deferred; their behavior cannot be claimed from local tests.
+The original local release uses Kubernetes jobs, private Sigstore and local MinIO.
+The opt-in GitHub profile now adds control-plane collection and signed receipts
+for configured workflow jobs. Public Sigstore and AWS remain outside this change.
+Live GitHub acceptance must be demonstrated separately; it is not established by
+the collector, cryptographic-boundary and PostgreSQL regression tests.
 
 See [database design](docs/database.md), [milestone status](docs/milestones.md),
 and the [approved plan](docs/approved-build-plan.md).

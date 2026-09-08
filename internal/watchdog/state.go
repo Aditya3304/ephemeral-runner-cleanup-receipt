@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/githubrun"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/proof"
 	"golang.org/x/sys/unix"
 )
@@ -140,10 +141,11 @@ func (e *Engine) Load(id proof.Identity) (*State, error) {
 	if err := id.Validate(); err != nil {
 		return nil, err
 	}
-	if id.Provider != "local" {
-		return nil, errors.New("local identity required")
+	if id.Provider != "local" && !githubrun.ValidIdentity(id) {
+		return nil, errors.New("supported provider identity required")
 	}
-	s := &State{Kind: "local-watchdog-state/v1", Identity: id, Current: Report{Identity: id, Status: "pending", Stage: "collect"}, History: []Report{}}
+	kind := id.Provider + "-watchdog-state/v1"
+	s := &State{Kind: kind, Identity: id, Current: Report{Identity: id, Status: "pending", Stage: "collect"}, History: []Report{}}
 	b, err := proof.ReadBounded(filepath.Join(e.Dir, Key(id)+".json"), 64<<10)
 	if errors.Is(err, os.ErrNotExist) {
 		return s, nil
@@ -151,7 +153,7 @@ func (e *Engine) Load(id proof.Identity) (*State, error) {
 	if err != nil {
 		return nil, err
 	}
-	if json.Unmarshal(b, s) != nil || s.Kind != "local-watchdog-state/v1" || s.Identity != id || s.Current.Identity != id || s.Current.Number < 0 || s.Current.Number > 6 || len(s.History) > 6 {
+	if json.Unmarshal(b, s) != nil || s.Kind != kind || s.Identity != id || s.Current.Identity != id || s.Current.Number < 0 || s.Current.Number > 6 || len(s.History) > 6 {
 		return nil, errors.New("invalid watchdog state")
 	}
 	canonical, _ := proof.Canonical(s)

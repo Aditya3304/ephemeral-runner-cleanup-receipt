@@ -9,6 +9,7 @@ import (
 
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/archive"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/finalizer"
+	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/githubrun"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/proof"
 )
 
@@ -92,6 +93,9 @@ func (v *Verifier) Verify(ctx context.Context, result finalizer.Result) (*Verifi
 var identifier = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._/-]{0,254}$`)
 
 func validIdentity(id proof.Identity) bool {
+	if id.Provider == "github" {
+		return githubrun.ValidIdentity(id)
+	}
 	return id.Validate() == nil && id.Provider == "local" && identifier.MatchString(id.Repository) && identifier.MatchString(id.Job) && regexp.MustCompile(`^[0-9a-f]{32}$`).MatchString(id.Run)
 }
 func sanitizedCoverage(r finalizer.Receipt) map[string]proof.Observation {

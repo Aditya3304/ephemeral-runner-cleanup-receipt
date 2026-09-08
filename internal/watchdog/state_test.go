@@ -77,6 +77,32 @@ func TestRetryBudgetRestartAndExhaustion(t *testing.T) {
 		t.Fatal("lost successful commit was not reconciled")
 	}
 }
+
+func TestGitHubRecoveryAndRerunIsolation(t *testing.T) {
+	e, b, now := setup(t)
+	id := identity()
+	id.Provider = "github"
+	id.Run = "12345"
+	s, err := e.Step(context.Background(), id)
+	if !errors.Is(err, b.err) || s.Kind != "github-watchdog-state/v1" || s.Current.Number != 1 || s.Current.Status != "retry" {
+		t.Fatalf("GitHub recovery not persisted: %+v %v", s, err)
+	}
+	*now = *s.Current.NextRetryAt
+	b.receipt = UUID()
+	s, err = e.Step(context.Background(), id)
+	if err != nil || s.Current.Status != "succeeded" || b.calls != 1 {
+		t.Fatal("GitHub commit not reconciled")
+	}
+	again, _ := e.Step(context.Background(), id)
+	if again.Current.ReceiptID != b.receipt || b.calls != 1 {
+		t.Fatal("GitHub duplicate recovery")
+	}
+	id.Attempt++
+	fresh, err := e.Load(id)
+	if err != nil || fresh.Current.Number != 0 {
+		t.Fatal("rerun shares prior recovery budget")
+	}
+}
 func TestCrashConsumesAttemptAndPersistsReports(t *testing.T) {
 	e, b, now := setup(t)
 	id := identity()

@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/coordinator"
+	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/githubrun"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/proof"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/watchdog"
 	"io"
@@ -29,12 +30,21 @@ type config struct {
 	APIImage        string            `json:"api_image"`
 	FinalizerConfig string            `json:"finalizer_config"`
 	Files           map[string]string `json:"files"`
+	GitHub          *githubrun.Config `json:"github,omitempty"`
 }
 type backend struct {
 	cfg        config
 	c          *coordinator.Coordinator
 	snapshot   watchdog.Inspection
 	inspectErr error
+	github     *githubrun.Client
+}
+
+func (b *backend) inputRoot() string {
+	if b.github != nil {
+		return filepath.Join(b.cfg.Root, ".build/github")
+	}
+	return b.c.Root
 }
 
 func (b *backend) command(ctx context.Context, input []byte, args ...string) ([]byte, error) {
@@ -97,26 +107,45 @@ func (b *backend) Report(ctx context.Context, r watchdog.Report) error {
 }
 func (b *backend) Recover(ctx context.Context, id proof.Identity) (watchdog.Outcome, error) {
 	fail := func(stage string, e error) (watchdog.Outcome, error) { return watchdog.Outcome{Stage: stage}, e }
-	// Shared coordinator flock is held by cycle. Never run a ledger command.
-	l, e := b.c.Load(id.Run)
-	if e != nil || l.Identity != id {
-		return watchdog.Outcome{Stage: "collect", Permanent: true}, errors.New("ledger identity changed")
-	}
-	ready := filepath.Join(b.c.Root, id.Run, "finalization-ready.json")
-	if _, e = os.Stat(ready); e != nil || l.Phase != "complete" {
-		// Recovery must not launch a job that never started. Record cancellation
-		// before the coordinator resumes its existing UID-bound collection path.
-		if l.JobUID == "" && !l.LaunchAttempted {
-			if e = b.c.RequestCancel(id.Run); e != nil {
+	inputKey := id.Run
+	if b.github != nil {
+		inputKey = githubrun.Directory(id)
+		if _, err := githubrun.Load(b.inputRoot(), id); errors.Is(err, os.ErrNotExist) {
+			l, files, err := b.github.Collect(ctx, id)
+			if errors.Is(err, githubrun.ErrPending) {
+				return fail("collect", watchdog.ErrBusy)
+			}
+			if err != nil {
+				return fail("collect", err)
+			}
+			if err = githubrun.Publish(b.inputRoot(), l, files); err != nil {
+				return fail("collect", err)
+			}
+		} else if err != nil {
+			return watchdog.Outcome{Stage: "collect", Permanent: true}, err
+		}
+	} else {
+		// Shared coordinator flock is held by cycle. Never run a ledger command.
+		l, e := b.c.Load(id.Run)
+		if e != nil || l.Identity != id {
+			return watchdog.Outcome{Stage: "collect", Permanent: true}, errors.New("ledger identity changed")
+		}
+		ready := filepath.Join(b.c.Root, id.Run, "finalization-ready.json")
+		if _, e = os.Stat(ready); e != nil || l.Phase != "complete" {
+			// Recovery must not launch a job that never started. Record cancellation
+			// before the coordinator resumes its existing UID-bound collection path.
+			if l.JobUID == "" && !l.LaunchAttempted {
+				if e = b.c.RequestCancel(id.Run); e != nil {
+					return fail("collect", e)
+				}
+			}
+			if _, e = b.c.Collect(ctx, id.Run); e != nil {
 				return fail("collect", e)
 			}
 		}
-		if _, e = b.c.Collect(ctx, id.Run); e != nil {
-			return fail("collect", e)
+		if e = validateInputs(filepath.Join(b.c.Root, id.Run), id); e != nil {
+			return watchdog.Outcome{Stage: "collect", Permanent: errors.Is(e, errInvalidInputs)}, e
 		}
-	}
-	if e = validateInputs(filepath.Join(b.c.Root, id.Run), id); e != nil {
-		return watchdog.Outcome{Stage: "collect", Permanent: errors.Is(e, errInvalidInputs)}, e
 	}
 	state, e := b.snapshot, b.inspectErr
 	if e != nil {
@@ -130,10 +159,10 @@ func (b *backend) Recover(ctx context.Context, id proof.Identity) (watchdog.Outc
 			return watchdog.Outcome{Stage: "sign", NotBefore: state.FinalizerDue}, errors.New("finalizer retry pending")
 		}
 		args := []string{"run", "--rm", "--pull=never", "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--user", "65532:65532", "--memory", "768m", "--cpus", "1", "--pids-limit", "64", "--tmpfs", "/tmp:rw,noexec,nosuid,size=384m,uid=65532,gid=65532,mode=700", "--network", "cleanup-receipt-archive", "--network", "cleanup-receipt-sigstore_sigstore", "-e", "GOMEMLIMIT=512MiB", "-e", "GOMAXPROCS=2"}
-		for _, v := range []string{b.c.Root + ":/input:ro", b.cfg.FinalizerConfig + ":/config/finalizer.json:ro", "cleanup-receipt-archive_finalizer:/secrets/archive:ro", "cleanup-receipt-sigstore_finalizer-identity:/secrets/signing:ro", "cleanup-receipt-sigstore_sigstore-trust:/trust:ro", "cleanup-receipt-finalizer_state:/state", "cleanup-receipt-finalizer_output:/output"} {
+		for _, v := range []string{b.inputRoot() + ":/input:ro", b.cfg.FinalizerConfig + ":/config/finalizer.json:ro", "cleanup-receipt-archive_finalizer:/secrets/archive:ro", "cleanup-receipt-sigstore_finalizer-identity:/secrets/signing:ro", "cleanup-receipt-sigstore_sigstore-trust:/trust:ro", "cleanup-receipt-finalizer_state:/state", "cleanup-receipt-finalizer_output:/output"} {
 			args = append(args, "-v", v)
 		}
-		args = append(args, b.cfg.FinalizerImage, "--config", "/config/finalizer.json", "--run", id.Run)
+		args = append(args, b.cfg.FinalizerImage, "--config", "/config/finalizer.json", "--run", inputKey)
 		if _, e = b.command(ctx, nil, args...); e != nil {
 			after, _ := b.inspect(ctx, id)
 			stage := after.FinalizerStage
@@ -156,6 +185,9 @@ func (b *backend) Recover(ctx context.Context, id proof.Identity) (watchdog.Outc
 	return watchdog.Outcome{Stage: "ingest", NotBefore: after.DeliveryDue, Exhausted: after.DeliveryStatus == "exhausted"}, deliverErr
 }
 func validate(c config) error {
+	if c.GitHub != nil && c.GitHub.Validate() != nil {
+		return errors.New("invalid GitHub policy")
+	}
 	if !filepath.IsAbs(c.Root) || !filepath.IsAbs(c.State) || !filepath.IsAbs(c.FinalizerConfig) || len(c.Files) < 2 {
 		return errors.New("invalid operator configuration")
 	}
@@ -179,23 +211,33 @@ func cycle(ctx context.Context, cfg config, only string) error {
 	if e := validate(cfg); e != nil {
 		return e
 	}
-	c, e := coordinator.Connect(filepath.Join(cfg.Root, ".build/kubeconfig"), filepath.Join(cfg.Root, ".build/coordinator"))
-	if e != nil {
-		return e
-	}
-	c.Out = io.Discard
-	b := &backend{cfg: cfg, c: c}
-	engine := watchdog.Engine{Dir: cfg.State, Backend: b}
+	// Both profiles share signer/delivery volumes and child labels. A single
+	// process lock prevents one profile from deleting another's live children.
+	engine := watchdog.Engine{Dir: cfg.State}
 	unlock, e := engine.Lock()
 	if e != nil {
 		return e
 	}
 	defer unlock()
-	release, e := c.Lock()
-	if e != nil {
-		return watchdog.ErrBusy
+	b := &backend{cfg: cfg}
+	engine.Backend = b
+	if cfg.GitHub != nil {
+		b.github, e = githubrun.New(*cfg.GitHub)
+		if e != nil {
+			return e
+		}
+	} else {
+		b.c, e = coordinator.Connect(filepath.Join(cfg.Root, ".build/kubeconfig"), filepath.Join(cfg.Root, ".build/coordinator"))
+		if e != nil {
+			return e
+		}
+		b.c.Out = io.Discard
+		release, err := b.c.Lock()
+		if err != nil {
+			return watchdog.ErrBusy
+		}
+		defer release()
 	}
-	defer release()
 	// A process killed with SIGKILL may leave its isolated Docker child alive.
 	// Only this project's explicitly labelled watchdog children are eligible.
 	orphans, e := exec.CommandContext(ctx, "/usr/bin/docker", "ps", "-aq", "--filter", "label=cleanup-receipt.watchdog=operator").Output()
@@ -210,27 +252,63 @@ func cycle(ctx context.Context, cfg config, only string) error {
 			return e
 		}
 	}
-	entries, e := os.ReadDir(c.Root)
-	if e != nil {
-		return e
-	}
 	ids := []proof.Identity{}
-	for _, entry := range entries {
-		if !entry.IsDir() || !regexp.MustCompile("^[0-9a-f]{32}$").MatchString(entry.Name()) || (only != "" && entry.Name() != only) {
-			continue
-		}
-		l, e := c.Load(entry.Name())
+	if b.github != nil {
+		ids, e = b.github.Discover(ctx)
 		if e != nil {
-			fmt.Println("Skipped invalid coordinator ledger:", entry.Name())
-			continue
+			fmt.Fprintln(os.Stderr, "GitHub discovery unavailable; retrying durable backlog:", e)
 		}
-		if time.Since(l.CreatedAt) < time.Duration(l.TimeoutSeconds)*time.Second+time.Minute && l.Phase != "complete" {
-			continue
+		// Persisted identities survive an unavailable API and discovery-window
+		// changes. Step can still deliver an already signed receipt offline.
+		entries, err := os.ReadDir(cfg.State)
+		if err != nil {
+			return err
 		}
-		ids = append(ids, l.Identity)
+		seen := map[string]bool{}
+		for _, id := range ids {
+			seen[watchdog.Key(id)] = true
+		}
+		for _, entry := range entries {
+			if entry.IsDir() || !regexp.MustCompile(`^[a-f0-9]{64}\.json$`).MatchString(entry.Name()) {
+				continue
+			}
+			data, err := proof.ReadBounded(filepath.Join(cfg.State, entry.Name()), 64<<10)
+			var s watchdog.State
+			if err != nil || json.Unmarshal(data, &s) != nil || s.Identity.Provider != "github" || s.Identity.Repository != cfg.GitHub.Repository || cfg.GitHub.Jobs[s.Identity.Job] == "" || seen[watchdog.Key(s.Identity)] {
+				continue
+			}
+			if _, err = engine.Load(s.Identity); err != nil {
+				return err
+			}
+			ids = append(ids, s.Identity)
+			seen[watchdog.Key(s.Identity)] = true
+		}
+	} else {
+		entries, e := os.ReadDir(b.c.Root)
+		if e != nil {
+			return e
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() || !regexp.MustCompile("^[0-9a-f]{32}$").MatchString(entry.Name()) || (only != "" && entry.Name() != only) {
+				continue
+			}
+			l, e := b.c.Load(entry.Name())
+			if e != nil {
+				fmt.Println("Skipped invalid coordinator ledger:", entry.Name())
+				continue
+			}
+			if time.Since(l.CreatedAt) < time.Duration(l.TimeoutSeconds)*time.Second+time.Minute && l.Phase != "complete" {
+				continue
+			}
+			ids = append(ids, l.Identity)
+		}
 	}
+	discoveryErr := e
 	sort.Slice(ids, func(i, j int) bool { return ids[i].Run < ids[j].Run })
 	for _, id := range ids {
+		if only != "" && id.Run != only {
+			continue
+		}
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
@@ -238,20 +316,20 @@ func cycle(ctx context.Context, cfg config, only string) error {
 		s, e := engine.Step(runctx, id)
 		cancel()
 		if s != nil {
-			_ = json.NewEncoder(os.Stdout).Encode(map[string]any{"run_id": id.Run, "status": s.Current.Status, "attempts": s.Current.Number, "stage": s.Current.Stage, "next_retry_at": s.Current.NextRetryAt, "receipt_id": s.Current.ReceiptID})
+			_ = json.NewEncoder(os.Stdout).Encode(map[string]any{"provider": id.Provider, "run_id": id.Run, "run_attempt": id.Attempt, "job_id": id.Job, "status": s.Current.Status, "attempts": s.Current.Number, "stage": s.Current.Stage, "next_retry_at": s.Current.NextRetryAt, "receipt_id": s.Current.ReceiptID})
 		}
 		if e != nil && s == nil {
 			fmt.Println("Recovery state unavailable:", id.Run)
 		}
 	}
-	return nil
+	return discoveryErr
 }
 func main() {
 	path := flag.String("config", "", "Installed operator config")
 	once := flag.Bool("once", false, "One reconciliation cycle")
-	only := flag.String("run", "", "Restrict a manual cycle to a local run")
+	only := flag.String("run", "", "Restrict a manual cycle to a provider run ID")
 	flag.Parse()
-	if *only != "" && (!*once || !regexp.MustCompile("^[a-f0-9]{32}$").MatchString(*only)) {
+	if *only != "" && (!*once || !regexp.MustCompile("^([a-f0-9]{32}|[1-9][0-9]{0,18})$").MatchString(*only)) {
 		os.Exit(2)
 	}
 	data, e := proof.ReadBounded(*path, 64<<10)

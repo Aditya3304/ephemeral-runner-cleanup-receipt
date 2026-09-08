@@ -1,4 +1,5 @@
-# DISABLED: documentation only. No workflow is installed in .github/workflows.
+# DISABLED: historical sketch. Use .github/workflows/cleanup-receipt-demo.yml
+# and the independent trusted collector described in docs/github.md.
 # Requires a coordinator-provisioned ephemeral Linux Kubernetes runner.
 # Its image contains immutable /opt/guard and /usr/local/bin/proofctl; provision
 # a read-only .guard directory in GITHUB_WORKSPACE containing action.yml + dist.

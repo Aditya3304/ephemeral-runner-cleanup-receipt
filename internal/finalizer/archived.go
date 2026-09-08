@@ -6,6 +6,7 @@ import (
 
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/archive"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/coordinator"
+	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/githubrun"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/proof"
 )
 
@@ -25,10 +26,19 @@ func ParseResult(data []byte) (*Result, error) {
 // The caller must independently authenticate the receipt before using this.
 func ValidateArchived(r *Receipt, files map[string][]byte) error {
 	var l coordinator.Ledger
-	if err := strictCanonical(files["run.json"], MaxReceipt, &l); err != nil {
+	if r.Identity.Provider == "github" {
+		g, err := githubrun.Parse(files["run.json"])
+		if err != nil {
+			return err
+		}
+		if g.Identity != r.Identity || githubrun.ValidateFiles(g, files) != nil {
+			return errors.New("archived GitHub binding mismatch")
+		}
+		l = *githubLedger(g)
+	} else if err := strictCanonical(files["run.json"], MaxReceipt, &l); err != nil {
 		return err
 	}
-	if l.Kind != "local-ci-run/v1" || l.Phase != "complete" || l.Token != r.Identity.Run || l.Identity != r.Identity {
+	if r.Identity.Provider == "local" && (l.Kind != "local-ci-run/v1" || l.Phase != "complete" || l.Token != r.Identity.Run || l.Identity != r.Identity) {
 		return errors.New("archived ledger identity mismatch")
 	}
 	refs := map[string]archive.Ref{}

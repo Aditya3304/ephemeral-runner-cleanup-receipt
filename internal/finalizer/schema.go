@@ -14,6 +14,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/archive"
+	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/githubrun"
 	"github.com/Aditya3304/ephemeral-runner-cleanup-receipt/internal/proof"
 	jcs "github.com/cyberphone/json-canonicalization/go/src/webpki.org/jsoncanonicalizer"
 )
@@ -165,8 +166,22 @@ func (r *Receipt) Validate() error {
 			return errors.New("invalid identity text")
 		}
 	}
-	if r.Identity.Provider != "local" || !tokenPattern.MatchString(r.Identity.Run) || r.Binding.ResourceNamespace != "proof-"+r.Identity.Run || r.Binding.RunnerNamespace != "proof-runner-"+r.Identity.Run {
+	if r.Identity.Provider == "local" && (!tokenPattern.MatchString(r.Identity.Run) || r.Binding.ResourceNamespace != "proof-"+r.Identity.Run || r.Binding.RunnerNamespace != "proof-runner-"+r.Identity.Run) {
 		return errors.New("invalid local assignment")
+	}
+	if r.Identity.Provider == "github" {
+		if !githubrun.ValidIdentity(r.Identity) || r.Binding.ClusterUID != "" || r.Binding.ResourceNamespace != "" || r.Binding.ResourceUID != "" || r.Binding.RunnerNamespace != "" || r.Binding.RunnerUID != "" || r.Binding.PodUID != "" || r.Binding.JobUID != "" && !regexp.MustCompile(`^[1-9][0-9]{0,18}$`).MatchString(r.Binding.JobUID) {
+			return errors.New("invalid GitHub assignment")
+		}
+		// GitHub's completed job status does not attest to VM destruction.
+		for _, k := range []string{"workspace", "credentials", "resources", "runner_disposal"} {
+			if r.Coverage[k].Observer == "trusted" {
+				return errors.New("GitHub profile cannot independently attest runner cleanup")
+			}
+		}
+		if o := r.Coverage["runner_disposal"]; o.Status != "unobservable" || o.Observer != "none" {
+			return errors.New("GitHub VM disposal is unobservable")
+		}
 	}
 	for _, s := range []string{r.Binding.ClusterUID, r.Binding.ResourceUID, r.Binding.RunnerUID, r.Binding.JobUID, r.Binding.PodUID} {
 		if !safeText(s, 255, true) {
