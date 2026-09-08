@@ -4,6 +4,19 @@ root=pathlib.Path(__file__).resolve().parents[2]
 revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
 proxy=subprocess.check_output(['docker','network','inspect','kind','--format','{{(index .IPAM.Config 0).Gateway}}'],text=True).strip()
 units={
+'cleanup-github-broker.service':f'''[Unit]
+Description=Credential-free GitHub request queue reached only through SSM
+After=network-online.target
+[Service]
+ExecStart=/usr/bin/python3 {root}/infra/github/broker.py
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+Restart=on-failure
+UMask=0077
+[Install]
+WantedBy=multi-user.target
+''',
 'cleanup-archive-sessions.service':f'''[Unit]
 Description=Rotate separated AWS archive sessions
 After=docker.service network-online.target
@@ -38,7 +51,7 @@ WantedBy=multi-user.target
 ''',
 'cleanup-github.service':f'''[Unit]
 Description=Source-approved ephemeral GitHub runner coordinator
-After=cleanup-github-proxy.service docker.service network-online.target
+After=cleanup-github-proxy.service cleanup-github-broker.service docker.service network-online.target
 [Service]
 WorkingDirectory={root}
 ExecStart={root}/.build/githubci --revision {revision} --proxy-ip {proxy}
@@ -52,4 +65,4 @@ WantedBy=multi-user.target
 '''}
 for name,text in units.items(): pathlib.Path('/etc/systemd/system',name).write_text(text)
 subprocess.run(['systemctl','daemon-reload'],check=True)
-subprocess.run(['systemctl','enable','--now','cleanup-archive-sessions.timer','cleanup-github-proxy.service','cleanup-github.service'],check=True)
+subprocess.run(['systemctl','enable','--now','cleanup-archive-sessions.timer','cleanup-github-proxy.service','cleanup-github-broker.service','cleanup-github.service'],check=True)

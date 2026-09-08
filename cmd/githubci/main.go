@@ -27,6 +27,7 @@ func run() error {
 	var c githubci.Client
 	var kube, ledger, proxy, image string
 	var once bool
+	flag.StringVar(&c.Broker, "broker", "http://127.0.0.1:8123/api", "Fixed local SSM bridge; keeps administrative GitHub credentials on the operator laptop")
 	flag.StringVar(&c.TokenFile, "token-file", "/opt/cleanup/operator/github-token", "Private operator token (Administration write, Actions read)")
 	flag.StringVar(&c.Repository, "repository", "Aditya3304/ephemeral-runner-cleanup-receipt", "Approved repository")
 	flag.StringVar(&c.Revision, "revision", "", "Exact approved workflow/source SHA")

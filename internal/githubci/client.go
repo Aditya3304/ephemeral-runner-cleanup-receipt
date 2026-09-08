@@ -19,6 +19,7 @@ import (
 )
 
 type Client struct {
+	Broker                                  string
 	TokenFile, Repository, Revision, Branch string
 	HTTP                                    *http.Client
 }
@@ -64,17 +65,26 @@ func (c *Client) Status(ctx context.Context, revision, state, description string
 
 func (e StatusError) Error() string { return fmt.Sprintf("GitHub API returned HTTP %d", int(e)) }
 func (c *Client) api(ctx context.Context, method, path string, input, output any) error {
-	st, err := os.Lstat(c.TokenFile)
-	if err != nil || !st.Mode().IsRegular() || st.Mode().Perm()&0077 != 0 || st.Size() > 16384 {
-		return errors.New("GitHub token must be in a private bounded regular file")
-	}
-	token, err := os.ReadFile(c.TokenFile)
-	if err != nil {
-		return errors.New("cannot read GitHub operator token")
-	}
-	t := strings.TrimSpace(string(token))
-	if t == "" || strings.ContainsAny(t, "\r\n") {
-		return errors.New("invalid GitHub operator token")
+	base := "https://api.github.com"
+	t := ""
+	if c.Broker != "" {
+		if c.Broker != "http://127.0.0.1:8123/api" {
+			return errors.New("GitHub broker must be the fixed local SSM bridge")
+		}
+		base = c.Broker
+	} else {
+		st, err := os.Lstat(c.TokenFile)
+		if err != nil || !st.Mode().IsRegular() || st.Mode().Perm()&0077 != 0 || st.Size() > 16384 {
+			return errors.New("GitHub token must be in a private bounded regular file")
+		}
+		token, err := os.ReadFile(c.TokenFile)
+		if err != nil {
+			return errors.New("cannot read GitHub operator token")
+		}
+		t = strings.TrimSpace(string(token))
+		if t == "" || strings.ContainsAny(t, "\r\n") {
+			return errors.New("invalid GitHub operator token")
+		}
 	}
 	var body io.Reader
 	if input != nil {
@@ -84,18 +94,20 @@ func (c *Client) api(ctx context.Context, method, path string, input, output any
 		}
 		body = bytes.NewReader(data)
 	}
-	req, err := http.NewRequestWithContext(ctx, method, "https://api.github.com/repos/"+c.Repository+path, body)
+	req, err := http.NewRequestWithContext(ctx, method, base+"/repos/"+c.Repository+path, body)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", "Bearer "+t)
+	if t != "" {
+		req.Header.Set("Authorization", "Bearer "+t)
+	}
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	req.Header.Set("User-Agent", "cleanup-receipt-coordinator")
 	req.Header.Set("Content-Type", "application/json")
 	client := c.HTTP
 	if client == nil {
-		client = &http.Client{Timeout: 20 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+		client = &http.Client{Timeout: 60 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	}
 	resp, err := client.Do(req)
 	if err != nil {
