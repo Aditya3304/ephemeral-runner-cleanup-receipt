@@ -4,9 +4,11 @@ This profile extends committed local release `4bc28ba15cb6ec85fec947ef73f231611c
 It runs the existing coordinator, node observer, isolated finalizer, private
 Fulcio/Rekor/CTLog/TSA, PostgreSQL and dashboard on a dedicated EC2 host. A real
 one-job GitHub Actions runner executes inside its `kind` cluster. Amazon S3 with
-SSE-KMS, versioning and seven-day Compliance Object Lock replaces the MinIO/KES
+SSE-KMS, versioning and Compliance Object Lock replaces the MinIO/KES
 services. The S3-compatible Go client library is retained; no MinIO server runs
-in this profile.
+in this profile. The verifier requires seven full days of protection. The bucket
+defaults to eight days because S3 rounds Last-Modified differently from its
+subsecond retention timestamp; the safety margin preserves the strict check.
 
 ## Cost and Firecracker decision
 

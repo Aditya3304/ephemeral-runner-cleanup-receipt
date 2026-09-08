@@ -17,9 +17,9 @@ bash scripts/finalizer-build.sh
 docker network inspect cleanup-receipt-archive >/dev/null 2>&1 || docker network create cleanup-receipt-archive
 python3 scripts/aws/sessions.py
 mkdir -p .build/finalizer-trust .build/finalized .build/coordinator
-chown 65532:65532 .build/finalizer-trust .build/finalized
+chown -R 65532:65532 .build/finalizer-trust .build/finalized
 base=postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
-docker run --rm --network none -v cleanup-receipt-sigstore_sigstore-trust:/trust:ro -v "$PWD/.build/finalizer-trust:/export" --entrypoint bash "$base" -ec 'cp /trust/trusted-root.json /trust/signing-config.json /trust/issuer-ca.crt /export/'
+docker run --rm --network none --user 65532:65532 -v cleanup-receipt-sigstore_sigstore-trust:/trust:ro -v "$PWD/.build/finalizer-trust:/export" --entrypoint bash "$base" -ec 'cp /trust/trusted-root.json /trust/signing-config.json /trust/issuer-ca.crt /export/'
 python3 scripts/finalizer-config.py
 export FINALIZER_IMAGE=$(cat .build/finalizer-image-id)
 docker compose -f compose.finalizer.yaml run --rm --no-deps init-state

@@ -12,6 +12,10 @@ func (c *Coordinator) configureGitHubJob(job *batch.Job, l *Ledger) {
 	g.Command = []string{"/usr/local/bin/node"}
 	g.Args = []string{"/opt/github/entrypoint.mjs"}
 	g.Env = append(g.Env,
+		// Private Kubernetes API calls must not enter the GitHub-only proxy.
+		// The per-pod gate still permits only the pinned Kubernetes destinations.
+		core.EnvVar{Name: "NO_PROXY", Value: "127.0.0.1,localhost,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"},
+		core.EnvVar{Name: "no_proxy", Value: "127.0.0.1,localhost,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"},
 		core.EnvVar{Name: "https_proxy", Value: "http://" + l.GitHub.ProxyIP + ":3128"},
 		core.EnvVar{Name: "http_proxy", Value: "http://" + l.GitHub.ProxyIP + ":3128"},
 		core.EnvVar{Name: "ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT", Value: "1"},
