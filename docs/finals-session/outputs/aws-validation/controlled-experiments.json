@@ -1,0 +1,44 @@
+[
+  {
+    "scenario": "normal",
+    "run_id": "34203311613",
+    "attempt": 2,
+    "workflow": "success",
+    "signed_cleanup": "pass",
+    "signature_state": "verified",
+    "receipt_sha256": "2b71b2934c6acc9cc016fb2678d95f50998c2e3510b4909ca99778f0c944d7ab",
+    "external_workspace": {
+      "reason": "Pinned stopped-runner directory is empty, including hidden entries",
+      "status": "verified"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34203311613/attempts/2"
+  },
+  {
+    "scenario": "test-failure",
+    "run_id": "34204207125",
+    "attempt": 1,
+    "workflow": "failure",
+    "signed_cleanup": "pass",
+    "signature_state": "verified",
+    "receipt_sha256": "3309452ed4da6c54fa635cb2526dbcbc341456c242a87070d24081517ec25752",
+    "external_workspace": {
+      "reason": "Pinned stopped-runner directory is empty, including hidden entries",
+      "status": "verified"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34204207125/attempts/1"
+  },
+  {
+    "scenario": "cleanup-blocked",
+    "run_id": "34204363463",
+    "attempt": 1,
+    "workflow": "failure",
+    "signed_cleanup": "fail",
+    "signature_state": "verified",
+    "receipt_sha256": "e5b92234dd19be6f4b653a73693aa14f61c0c8c218b40957f648e0dee649c632",
+    "external_workspace": {
+      "reason": "Residual directory entry remains after guard termination",
+      "status": "failed"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34204363463/attempts/1"
+  }
+]

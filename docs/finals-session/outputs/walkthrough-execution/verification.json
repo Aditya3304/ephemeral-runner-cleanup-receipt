@@ -1,0 +1,107 @@
+[
+  {
+    "run_id": "34215449903",
+    "scenario": "normal",
+    "offline_signature": "verified",
+    "altered_bytes": "rejected",
+    "observations_hash": "matched signed reference",
+    "workspace": {
+      "reason": "Pinned stopped-runner directory is empty, including hidden entries",
+      "status": "verified"
+    },
+    "s3_encryption": "aws:kms",
+    "retention_mode": "COMPLIANCE",
+    "retained_until": "2026-09-16T10:28:00.344000+00:00",
+    "live_files": "observed in running pod"
+  },
+  {
+    "run_id": "34215613350",
+    "scenario": "test-failure",
+    "offline_signature": "verified",
+    "altered_bytes": "rejected",
+    "observations_hash": "matched signed reference",
+    "workspace": {
+      "reason": "Pinned stopped-runner directory is empty, including hidden entries",
+      "status": "verified"
+    },
+    "s3_encryption": "aws:kms",
+    "retention_mode": "COMPLIANCE",
+    "retained_until": "2026-09-16T10:29:45.386000+00:00",
+    "live_files": "observed in running pod"
+  },
+  {
+    "run_id": "34215767448",
+    "scenario": "cleanup-blocked",
+    "offline_signature": "verified",
+    "altered_bytes": "rejected",
+    "observations_hash": "matched signed reference",
+    "workspace": {
+      "reason": "Residual directory entry remains after guard termination",
+      "status": "failed"
+    },
+    "s3_encryption": "aws:kms",
+    "retention_mode": "COMPLIANCE",
+    "retained_until": "2026-09-16T10:31:34.465000+00:00",
+    "live_files": "observed in running pod"
+  },
+  {
+    "run_id": "34216421814",
+    "scenario": "normal",
+    "offline_signature": "verified",
+    "altered_bytes": "rejected",
+    "observations_hash": "matched signed reference",
+    "workspace": {
+      "reason": "Pinned stopped-runner directory is empty, including hidden entries",
+      "status": "verified"
+    },
+    "s3_encryption": "aws:kms",
+    "retention_mode": "COMPLIANCE",
+    "retained_until": "2026-09-16T10:39:08.102000+00:00",
+    "live_files": "observed in running pod"
+  },
+  {
+    "run_id": "34218897916",
+    "scenario": "test-failure",
+    "offline_signature": "verified",
+    "altered_bytes": "rejected",
+    "observations_hash": "matched signed reference",
+    "workspace": {
+      "reason": "Pinned stopped-runner directory is empty, including hidden entries",
+      "status": "verified"
+    },
+    "s3_encryption": "aws:kms",
+    "retention_mode": "COMPLIANCE",
+    "retained_until": "2026-09-16T11:07:30.161000+00:00",
+    "live_files": "observed in running pod"
+  },
+  {
+    "run_id": "34219047670",
+    "scenario": "cleanup-blocked",
+    "offline_signature": "verified",
+    "altered_bytes": "rejected",
+    "observations_hash": "matched signed reference",
+    "workspace": {
+      "reason": "Residual directory entry remains after guard termination",
+      "status": "failed"
+    },
+    "s3_encryption": "aws:kms",
+    "retention_mode": "COMPLIANCE",
+    "retained_until": "2026-09-16T11:09:13.226000+00:00",
+    "live_files": "observed in running pod"
+  },
+  {
+    "run_id": "34219196086",
+    "scenario": "normal",
+    "offline_signature": "verified",
+    "altered_bytes": "rejected",
+    "observations_hash": "matched signed reference",
+    "workspace": {
+      "reason": "Pinned stopped-runner directory is empty, including hidden entries",
+      "status": "verified"
+    },
+    "s3_encryption": "aws:kms",
+    "retention_mode": "COMPLIANCE",
+    "retained_until": "2026-09-16T11:10:59.259000+00:00",
+    "live_files": "observed in running pod"
+  }
+]

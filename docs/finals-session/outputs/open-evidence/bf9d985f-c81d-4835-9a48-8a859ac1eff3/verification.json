@@ -1,0 +1,15 @@
+{
+  "receipt_id": "bf9d985f-c81d-4835-9a48-8a859ac1eff3",
+  "run_id": "34223206048",
+  "verdict": "fail",
+  "signature": "verified",
+  "all_exported_hashes": "matched signed references",
+  "altered_bytes": "rejected",
+  "online_verification": {
+    "artifacts": "verified",
+    "checked_at": "2026-09-08T11:57:07.260950957Z",
+    "receipt_sha256": "fd1bf5e325b2008a33317b0c645d605ae845757cf66b3ae483759841b81f0f9f",
+    "signature": "verified",
+    "verdict": "fail"
+  }
+}

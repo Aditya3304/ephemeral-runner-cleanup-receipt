@@ -1,0 +1,58 @@
+[
+  {
+    "run": "34197128621-1",
+    "verdict": "partial",
+    "receipt_sha256": "41b516dd03e4d6527f8579df7467fee3cf1af0a2778556ebfac780c5bc5a4761",
+    "offline_signature": "verified",
+    "tampered_bytes": "rejected"
+  },
+  {
+    "run": "34199257494-1",
+    "verdict": "pass",
+    "receipt_sha256": "7520e21dd61ab8ac4da45cb13d957bbca6f349825d59edb010472146973e4a57",
+    "offline_signature": "verified",
+    "tampered_bytes": "rejected"
+  },
+  {
+    "run": "34200085381-1",
+    "verdict": "pass",
+    "receipt_sha256": "53eab65fd7409ae1ddfb3e96fc2bf879f7053288395da773027d8725923d2cef",
+    "offline_signature": "verified",
+    "tampered_bytes": "rejected"
+  },
+  {
+    "run": "34200085381-2",
+    "verdict": "pass",
+    "receipt_sha256": "f7168621546b318d13cf57a1cd9290b901d9692612617eb115cc987383e5f5ad",
+    "offline_signature": "verified",
+    "tampered_bytes": "rejected"
+  },
+  {
+    "run": "34203311613-1",
+    "verdict": "pass",
+    "receipt_sha256": "a7bbefeaec5673f7214c2c03ce80ddd907d86498713f5a6452cd27db2f022091",
+    "offline_signature": "verified",
+    "tampered_bytes": "rejected"
+  },
+  {
+    "run": "34203311613-2",
+    "verdict": "pass",
+    "receipt_sha256": "2b71b2934c6acc9cc016fb2678d95f50998c2e3510b4909ca99778f0c944d7ab",
+    "offline_signature": "verified",
+    "tampered_bytes": "rejected"
+  },
+  {
+    "run": "34204207125-1",
+    "verdict": "pass",
+    "receipt_sha256": "3309452ed4da6c54fa635cb2526dbcbc341456c242a87070d24081517ec25752",
+    "offline_signature": "verified",
+    "tampered_bytes": "rejected"
+  },
+  {
+    "run": "34204363463-1",
+    "verdict": "fail",
+    "receipt_sha256": "e5b92234dd19be6f4b653a73693aa14f61c0c8c218b40957f648e0dee649c632",
+    "offline_signature": "verified",
+    "tampered_bytes": "rejected"
+  }
+]

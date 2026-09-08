@@ -1,0 +1,1316 @@
+[
+  {
+    "scenario": "normal",
+    "run_id": "34215449903",
+    "attempt": 1,
+    "workflow": "success",
+    "receipt": {
+      "id": "2f2c5918-a7ab-449d-8df9-405d83cadcd9",
+      "job_id": "guarded",
+      "run_id": "34215449903",
+      "verdict": "pass",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": null,
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T10:26:41.14204+00:00",
+      "ingested_at": "2026-09-08T10:28:02.796475+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/7a8ec46c64490c72b00ac1e4e84de0385aac1adaa95050e4b3a0f4ed26587924",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "7a8ec46c64490c72b00ac1e4e84de0385aac1adaa95050e4b3a0f4ed26587924",
+          "size_bytes": 340778,
+          "version_id": ".0a5fVFZ5uyhrVESqHfhUpOAvkK12eon"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T10:27:56.313131+00:00",
+      "finalized_at": "2026-09-08T10:27:57.544153+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/31062f08f1479b286c5896d5daa19ea9a70c44ba144acd3cc54b6b587d247a2f",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "31062f08f1479b286c5896d5daa19ea9a70c44ba144acd3cc54b6b587d247a2f",
+        "size_bytes": 4462,
+        "version_id": "L8yfzXtUIB77.1dBTVAQR4M16EGkO4qj"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/64f450280495c6402e1dae2175c0c0e11b11e4803e11d528c4bf52213b08fee1",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "64f450280495c6402e1dae2175c0c0e11b11e4803e11d528c4bf52213b08fee1",
+        "size_bytes": 3583,
+        "version_id": "yUMDz2usekz._UZXhJOnsISzVCe6u1BR"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-b410c09da4dcf6d8f8b157fa91b9fd34",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-b410c09da4dcf6d8f8b157fa91b9fd34"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34215449903",
+    "dashboard": "http://localhost:18080/?receipt=2f2c5918-a7ab-449d-8df9-405d83cadcd9",
+    "live_capture_command": "112a1b76-d0bf-4085-aff4-24f7df0d88c7"
+  },
+  {
+    "scenario": "test-failure",
+    "run_id": "34215613350",
+    "attempt": 1,
+    "workflow": "failure",
+    "receipt": {
+      "id": "75e18991-52ae-4a9e-9d20-957d5102d7dd",
+      "job_id": "guarded",
+      "run_id": "34215613350",
+      "verdict": "pass",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": null,
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T10:28:24.08539+00:00",
+      "ingested_at": "2026-09-08T10:29:47.6887+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/8bb95f9ef6e2c76d0d40b1d632ee794810c81639afaa4609546d36a4a47f9dac",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "8bb95f9ef6e2c76d0d40b1d632ee794810c81639afaa4609546d36a4a47f9dac",
+          "size_bytes": 318877,
+          "version_id": "649CkOTOAC1GjwOmiiliqWXV2jIxhiSA"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T10:29:40.874126+00:00",
+      "finalized_at": "2026-09-08T10:29:42.010475+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/a6b576e64c85df43d2fc694abccadffa99bdcdc01c967dda42961e7e86f0ebf3",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "a6b576e64c85df43d2fc694abccadffa99bdcdc01c967dda42961e7e86f0ebf3",
+        "size_bytes": 4464,
+        "version_id": "YCDr33Pgmrq5xXVRRhd6mQkqpGe7jWWm"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/fe82358429b421451cbd97279d115455e37a6ec7e00b4880cff65a9e88437683",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "fe82358429b421451cbd97279d115455e37a6ec7e00b4880cff65a9e88437683",
+        "size_bytes": 3582,
+        "version_id": "KXMD2T6xDHtWQDlRuugxZarVZqoIY1pa"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-4454dc823e269a3138a8d77bcdbbc94f",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-4454dc823e269a3138a8d77bcdbbc94f"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34215613350",
+    "dashboard": "http://localhost:18080/?receipt=75e18991-52ae-4a9e-9d20-957d5102d7dd",
+    "live_capture_command": "5dc86df1-94f9-47ef-9324-69a33f8508cf"
+  },
+  {
+    "scenario": "cleanup-blocked",
+    "run_id": "34215767448",
+    "attempt": 1,
+    "workflow": "failure",
+    "receipt": {
+      "id": "5c0df43d-749e-4ca8-8b3a-9b4646de1c54",
+      "job_id": "guarded",
+      "run_id": "34215767448",
+      "verdict": "fail",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: failed (job observation). See signed archive for details.",
+          "status": "failed",
+          "observer": "job"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": {
+        "id": "96245b5a-fc05-4b3b-b1ce-5a8189b83fc1",
+        "state": "open",
+        "reason": "Cleanup fail. Inspect component coverage and independently verify the archived evidence.",
+        "issue_key": "cleanup:5c0df43d-749e-4ca8-8b3a-9b4646de1c54",
+        "created_at": "2026-09-08T10:31:36.728794+00:00",
+        "receipt_id": "5c0df43d-749e-4ca8-8b3a-9b4646de1c54",
+        "reason_code": "cleanup_fail",
+        "resolved_at": null,
+        "github_issue_url": null
+      },
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T10:30:11.475583+00:00",
+      "ingested_at": "2026-09-08T10:31:36.728794+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/25f2f83248222777d281df207d756e4d558851ff45770a78e6a84f9ade749047",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "25f2f83248222777d281df207d756e4d558851ff45770a78e6a84f9ade749047",
+          "size_bytes": 319125,
+          "version_id": "n2HEV2VuYCH7aTtIoKyFKUG3oddDcxwi"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T10:31:30.16673+00:00",
+      "finalized_at": "2026-09-08T10:31:31.325166+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/ca6072dae046387e90c045f96a4962026d72df0188f3a1745ab2702f15a7e2d7",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "ca6072dae046387e90c045f96a4962026d72df0188f3a1745ab2702f15a7e2d7",
+        "size_bytes": 4503,
+        "version_id": "hwPko3_ua.589cSczVoPxPofkKnnkmoT"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/51efe0d34a4a508be1f21214f1beb67aa7840620cf6c884ddd340297bef5e380",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "51efe0d34a4a508be1f21214f1beb67aa7840620cf6c884ddd340297bef5e380",
+        "size_bytes": 3562,
+        "version_id": "q74OAO3ywQA0OPiXX8wy_Qt.ZY6_dEZe"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-5da275e7d6c5bbd7efd292ec197972b0",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-5da275e7d6c5bbd7efd292ec197972b0"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34215767448",
+    "dashboard": "http://localhost:18080/?receipt=5c0df43d-749e-4ca8-8b3a-9b4646de1c54",
+    "live_capture_command": "4019d732-00e7-4987-a3ca-87f56f2a0c5b"
+  },
+  {
+    "scenario": "normal",
+    "run_id": "34216421814",
+    "attempt": 1,
+    "workflow": "success",
+    "receipt": {
+      "id": "f389b6b2-8080-4dc9-965f-b72b73a8d1cf",
+      "job_id": "guarded",
+      "run_id": "34216421814",
+      "verdict": "pass",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": null,
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T10:37:37.41108+00:00",
+      "ingested_at": "2026-09-08T10:39:10.833708+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/6ad0bb315e129e9c3dd68996ca6f43d02a3d7e1b326f68000fba57b584c888ee",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "6ad0bb315e129e9c3dd68996ca6f43d02a3d7e1b326f68000fba57b584c888ee",
+          "size_bytes": 318815,
+          "version_id": "c1RGo8Zq1LORCqydofhe6Y2Y.95tvwgv"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T10:39:03.801652+00:00",
+      "finalized_at": "2026-09-08T10:39:05.448638+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/0fb7c8826dc9ccc786aa95ef0dc933ac4a90acfb971a413ec2bf0f8728a57ece",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "0fb7c8826dc9ccc786aa95ef0dc933ac4a90acfb971a413ec2bf0f8728a57ece",
+        "size_bytes": 4464,
+        "version_id": "A20.ODFz.uMll0mzKXYcnxZGN62SldVo"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/1e069fc6c43b6754b782d20806a21f7646574e7eeb84cbe8af87485067e34ff9",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "1e069fc6c43b6754b782d20806a21f7646574e7eeb84cbe8af87485067e34ff9",
+        "size_bytes": 3582,
+        "version_id": "0V4QDLNBAwo1Qg8WM2lvLst3KCBBk6V7"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-763783ce6f1c6ea74d42f9946afb0b68",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-763783ce6f1c6ea74d42f9946afb0b68"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34216421814",
+    "dashboard": "http://localhost:18080/?receipt=f389b6b2-8080-4dc9-965f-b72b73a8d1cf",
+    "live_capture_command": "182c67ab-bbbb-4de7-86c8-39de8fb81126"
+  },
+  {
+    "scenario": "test-failure",
+    "run_id": "34218897916",
+    "attempt": 1,
+    "workflow": "failure",
+    "receipt": {
+      "id": "2cb0d908-a566-45f5-932b-025bd49c9e8b",
+      "job_id": "guarded",
+      "run_id": "34218897916",
+      "verdict": "pass",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": null,
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T11:06:11.268886+00:00",
+      "ingested_at": "2026-09-08T11:07:32.554407+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/f5b8d6932dc8662edf7512437cdbff1064b5a179ae1efecb0cb62df65c0485be",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "f5b8d6932dc8662edf7512437cdbff1064b5a179ae1efecb0cb62df65c0485be",
+          "size_bytes": 319055,
+          "version_id": "O4Zp0MH0q.96cSv9e7Hd4ef2qdwryhgN"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T11:07:26.258986+00:00",
+      "finalized_at": "2026-09-08T11:07:27.370937+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/009cfb5a10b3e57486cfee22d302e6adab0a8649f3d7779e71eb8f45e43b04d4",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "009cfb5a10b3e57486cfee22d302e6adab0a8649f3d7779e71eb8f45e43b04d4",
+        "size_bytes": 4511,
+        "version_id": "qAUNnvYPtYaGS3erIEutYlkLGMpGFJry"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/3c507af19cfa022b43235f91658a5f0ad0fde7592c7596f87cb61086ba58500a",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "3c507af19cfa022b43235f91658a5f0ad0fde7592c7596f87cb61086ba58500a",
+        "size_bytes": 3583,
+        "version_id": "PF.fbJ2UGuK1vN3PBuhtfW8UD_Vjwl29"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-adce013b65658f1c6501107ab0b4284a",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-adce013b65658f1c6501107ab0b4284a"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34218897916",
+    "dashboard": "http://localhost:18080/?receipt=2cb0d908-a566-45f5-932b-025bd49c9e8b",
+    "live_capture_command": "904d4c4a-4f2d-4368-b58c-2d7c0e08149f"
+  },
+  {
+    "scenario": "cleanup-blocked",
+    "run_id": "34219047670",
+    "attempt": 1,
+    "workflow": "failure",
+    "receipt": {
+      "id": "719e2051-699f-460d-9918-ead78c301b82",
+      "job_id": "guarded",
+      "run_id": "34219047670",
+      "verdict": "fail",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: failed (job observation). See signed archive for details.",
+          "status": "failed",
+          "observer": "job"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": {
+        "id": "2c348d6b-4f5e-46d9-91c3-e25c86c1dfbf",
+        "state": "open",
+        "reason": "Cleanup fail. Inspect component coverage and independently verify the archived evidence.",
+        "issue_key": "cleanup:719e2051-699f-460d-9918-ead78c301b82",
+        "created_at": "2026-09-08T11:09:15.526712+00:00",
+        "receipt_id": "719e2051-699f-460d-9918-ead78c301b82",
+        "reason_code": "cleanup_fail",
+        "resolved_at": null,
+        "github_issue_url": null
+      },
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T11:07:54.401094+00:00",
+      "ingested_at": "2026-09-08T11:09:15.526712+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/7d9f6bea88e560d84d1c789de2d048e48ba37b03b6668a45b006a90b4d6d6ed6",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "7d9f6bea88e560d84d1c789de2d048e48ba37b03b6668a45b006a90b4d6d6ed6",
+          "size_bytes": 319080,
+          "version_id": "lHGN7VyzbGUZ9QzJLxkmWZfWHDQ5Mqu5"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T11:09:09.135896+00:00",
+      "finalized_at": "2026-09-08T11:09:10.233127+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/f57caaf0dd9e05bf37366e226ee59c675ad1c1a94cb95e334c8f1edfb4f95be3",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "f57caaf0dd9e05bf37366e226ee59c675ad1c1a94cb95e334c8f1edfb4f95be3",
+        "size_bytes": 4550,
+        "version_id": "v6P._EK29miBVdB7JsRy9HQPld6C4LYd"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/651e0449c9a589c289937e7e4f85317e3862c903adb6d1aa7daa927127110f5f",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "651e0449c9a589c289937e7e4f85317e3862c903adb6d1aa7daa927127110f5f",
+        "size_bytes": 3562,
+        "version_id": "iadygYC4jkgX6rkvE9zCGr_WytoArA0f"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-356cd3e32b7084b8509578668994a926",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-356cd3e32b7084b8509578668994a926"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34219047670",
+    "dashboard": "http://localhost:18080/?receipt=719e2051-699f-460d-9918-ead78c301b82",
+    "live_capture_command": "c6e13c59-d63c-41ae-95b9-77d868620f2d"
+  },
+  {
+    "scenario": "normal",
+    "run_id": "34219196086",
+    "attempt": 1,
+    "workflow": "success",
+    "receipt": {
+      "id": "08e6009c-142e-4d91-bd2f-fd4cfc91a250",
+      "job_id": "guarded",
+      "run_id": "34219196086",
+      "verdict": "pass",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": null,
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T11:09:41.040828+00:00",
+      "ingested_at": "2026-09-08T11:11:01.609874+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/7b01e58b894c4d68c5ef0bde71d571c17330eb25a87d435352545d5c74e6825e",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "7b01e58b894c4d68c5ef0bde71d571c17330eb25a87d435352545d5c74e6825e",
+          "size_bytes": 318624,
+          "version_id": "8kYBl7vZdeaW2aoqOz2h_DM6G3iNH5jL"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T11:10:55.542975+00:00",
+      "finalized_at": "2026-09-08T11:10:56.647708+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/056e25d02e7753485311a218e7192967accaedf03b10bf2a63edb0b23fabfe9e",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "056e25d02e7753485311a218e7192967accaedf03b10bf2a63edb0b23fabfe9e",
+        "size_bytes": 4417,
+        "version_id": "mYPTlVC.PsbK1qP8C2D_mFglc4hbGkPV"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/57b02c59b5a0e933f0ee31439765f85b496815266eb734d74c35c7a5225e9014",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "57b02c59b5a0e933f0ee31439765f85b496815266eb734d74c35c7a5225e9014",
+        "size_bytes": 3582,
+        "version_id": "ISjGHVZ7dtZ7R3UvDnpmyYrWoI5bcjU9"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-29c6e2efef4340fe00027c8927d37a35",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-29c6e2efef4340fe00027c8927d37a35"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34219196086",
+    "dashboard": "http://localhost:18080/?receipt=08e6009c-142e-4d91-bd2f-fd4cfc91a250",
+    "live_capture_command": "6c6ea2b5-d683-41b5-8415-2b1cc7fec721"
+  },
+  {
+    "scenario": "normal",
+    "run_id": "34220096575",
+    "attempt": 1,
+    "workflow": "success",
+    "receipt": {
+      "id": "dfef6c0b-ea41-4367-b370-4c2de1320112",
+      "job_id": "guarded",
+      "run_id": "34220096575",
+      "verdict": "pass",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": null,
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T11:20:00.101021+00:00",
+      "ingested_at": "2026-09-08T11:21:21.174852+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/3d564f806748b53febdee1f734955f9994a995add32bede2f0e708987a414033",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "3d564f806748b53febdee1f734955f9994a995add32bede2f0e708987a414033",
+          "size_bytes": 318853,
+          "version_id": "bBtGUUVHkPI80T6E3wpbju.TJlvbni_8"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T11:21:14.190801+00:00",
+      "finalized_at": "2026-09-08T11:21:15.720382+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/3b8255bda35dfcf094613ab4d437fdbadc835e88c7f742673e4e00e4fc064a24",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "3b8255bda35dfcf094613ab4d437fdbadc835e88c7f742673e4e00e4fc064a24",
+        "size_bytes": 4464,
+        "version_id": "u22qPRLe0VrZ9B_a7DeLsz4uRG5CAGQG"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/621f591705c988f0d86f6ff37f038e50d5a192baf7c51e9d4ef08b5b46f1c004",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "621f591705c988f0d86f6ff37f038e50d5a192baf7c51e9d4ef08b5b46f1c004",
+        "size_bytes": 3583,
+        "version_id": "nSN0EcgMxQVvCL6J5xcOgPws6n3OLkD6"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-ef7781e47b5e3f5bb393c51c0e42dd15",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-ef7781e47b5e3f5bb393c51c0e42dd15"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34220096575",
+    "dashboard": "http://localhost:18080/?receipt=dfef6c0b-ea41-4367-b370-4c2de1320112",
+    "live_capture_command": "3cc0a5b0-3f9a-40ae-93b8-5b3b64d3b6ef"
+  },
+  {
+    "scenario": "test-failure",
+    "run_id": "34220301677",
+    "attempt": 1,
+    "workflow": "failure",
+    "receipt": {
+      "id": "37f3959d-fcfc-4902-9e89-5322d76afabe",
+      "job_id": "guarded",
+      "run_id": "34220301677",
+      "verdict": "pass",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": null,
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T11:22:10.146272+00:00",
+      "ingested_at": "2026-09-08T11:23:30.50446+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/7ebbd352230e52cc571e59f90563a455e2418517a5bee0efc29f402289222b2e",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "7ebbd352230e52cc571e59f90563a455e2418517a5bee0efc29f402289222b2e",
+          "size_bytes": 319105,
+          "version_id": "RdYJPeK0I9RxVc.jw4UfuC29xLkcGW2e"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T11:23:24.409834+00:00",
+      "finalized_at": "2026-09-08T11:23:25.518058+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/68361064a8a22cfe67338fa05a65aa992d5af45c8cf0ebce413cc67a72750afa",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "68361064a8a22cfe67338fa05a65aa992d5af45c8cf0ebce413cc67a72750afa",
+        "size_bytes": 4476,
+        "version_id": ".jKlIDnSWBlzhnUxDPBmDCW5N6Rvmcvp"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/434b28ad280b910a989e92bc73528a99d7a0f56dd4d4c5776aa2cd7026dbca7f",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "434b28ad280b910a989e92bc73528a99d7a0f56dd4d4c5776aa2cd7026dbca7f",
+        "size_bytes": 3583,
+        "version_id": "GbXqDpKFyZxXMVjPA2YnGHeOYiwznJkZ"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-8afa01a17e561569c607ff3d27233cd7",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-8afa01a17e561569c607ff3d27233cd7"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34220301677",
+    "dashboard": "http://localhost:18080/?receipt=37f3959d-fcfc-4902-9e89-5322d76afabe",
+    "live_capture_command": "4e880037-fdd0-4fbe-9e04-ea42f4425cfd"
+  },
+  {
+    "scenario": "cleanup-blocked",
+    "run_id": "34220482427",
+    "attempt": 1,
+    "workflow": "failure",
+    "receipt": {
+      "id": "cb5e4874-0472-4988-82b5-1dfa847699ee",
+      "job_id": "guarded",
+      "run_id": "34220482427",
+      "verdict": "fail",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: failed (job observation). See signed archive for details.",
+          "status": "failed",
+          "observer": "job"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": {
+        "id": "dd6d57d3-125d-4fcb-857e-288defc17634",
+        "state": "open",
+        "reason": "Cleanup fail. Inspect component coverage and independently verify the archived evidence.",
+        "issue_key": "cleanup:cb5e4874-0472-4988-82b5-1dfa847699ee",
+        "created_at": "2026-09-08T11:25:41.422931+00:00",
+        "receipt_id": "cb5e4874-0472-4988-82b5-1dfa847699ee",
+        "reason_code": "cleanup_fail",
+        "resolved_at": null,
+        "github_issue_url": null
+      },
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T11:24:19.422596+00:00",
+      "ingested_at": "2026-09-08T11:25:41.422931+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/b434ab09c5f66ae30fc50f4c9644f399ac02562d07a300865e05630c0f42e38b",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "b434ab09c5f66ae30fc50f4c9644f399ac02562d07a300865e05630c0f42e38b",
+          "size_bytes": 317879,
+          "version_id": "T.PkA..2X9NUDjghzLT5n2dy7PsBn4U_"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T11:25:34.728493+00:00",
+      "finalized_at": "2026-09-08T11:25:35.827519+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/1a363147380a412d33a06e0508198f7d8a4c21ffde002f838667475d30f7bbca",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "1a363147380a412d33a06e0508198f7d8a4c21ffde002f838667475d30f7bbca",
+        "size_bytes": 4503,
+        "version_id": "jxsfn66k5EypZTcsmJ1mEvujFIpT4KMj"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/bf94b8a1586b3dab04fa66140bda9ec61073f54a7f690dfe79cd9dbdb7c2ebeb",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "bf94b8a1586b3dab04fa66140bda9ec61073f54a7f690dfe79cd9dbdb7c2ebeb",
+        "size_bytes": 3562,
+        "version_id": "j6CQNJ6EwRbO9gKDTPDKBFTRTZ0fvZwj"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-25dcbaae41751a89cfff335dfe79bbf4",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-25dcbaae41751a89cfff335dfe79bbf4"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34220482427",
+    "dashboard": "http://localhost:18080/?receipt=cb5e4874-0472-4988-82b5-1dfa847699ee",
+    "live_capture_command": "3b4f76b0-0bc0-4af9-87f4-73cd98237ed3"
+  },
+  {
+    "scenario": "normal",
+    "run_id": "34220681769",
+    "attempt": 1,
+    "workflow": "success",
+    "receipt": {
+      "id": "eee15f6b-2d97-42eb-b85e-744e44447865",
+      "job_id": "guarded",
+      "run_id": "34220681769",
+      "verdict": "pass",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": null,
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T11:26:32.990284+00:00",
+      "ingested_at": "2026-09-08T11:27:56.188098+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/4cd9a689236a79dbae2b4c2d879a7e2f03a235809b7e05702c4bfa8721edae72",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "4cd9a689236a79dbae2b4c2d879a7e2f03a235809b7e05702c4bfa8721edae72",
+          "size_bytes": 317412,
+          "version_id": "cbc1wTHqLy6yzA6IzaaaYlzUFek6mjZk"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T11:27:50.436506+00:00",
+      "finalized_at": "2026-09-08T11:27:51.58936+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/e2a7d4f7b0bdc3eb9764b54cf0778ee651910c18e7174c578d1a6c1d9aeb1371",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "e2a7d4f7b0bdc3eb9764b54cf0778ee651910c18e7174c578d1a6c1d9aeb1371",
+        "size_bytes": 4464,
+        "version_id": "C5w1oLzt36Cwdv3hGEptcHoK25eRe8Rn"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/4af905972250af191869dc88185aaf03a9a3dd85494695798cf768d340f079f7",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "4af905972250af191869dc88185aaf03a9a3dd85494695798cf768d340f079f7",
+        "size_bytes": 3582,
+        "version_id": "vJF3zk2BYINaQUOTB86tSK6c8d5lfsD."
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-2d075107b66ffbe7a81e3f7622c174aa",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-2d075107b66ffbe7a81e3f7622c174aa"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34220681769",
+    "dashboard": "http://localhost:18080/?receipt=eee15f6b-2d97-42eb-b85e-744e44447865",
+    "live_capture_command": "303c9208-c1dc-46fc-a108-98050356e5ed"
+  },
+  {
+    "scenario": "normal",
+    "run_id": "34222826865",
+    "attempt": 1,
+    "workflow": "success",
+    "receipt": {
+      "id": "546d60bb-2e4f-447f-bf16-55beb0c1d5ef",
+      "job_id": "guarded",
+      "run_id": "34222826865",
+      "verdict": "pass",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": null,
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T11:50:56.580117+00:00",
+      "ingested_at": "2026-09-08T11:52:17.516908+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/789533a732d23dddcd15d3a03b4c796430ce11ad3201edce8ffd3dd0a132f82c",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "789533a732d23dddcd15d3a03b4c796430ce11ad3201edce8ffd3dd0a132f82c",
+          "size_bytes": 318671,
+          "version_id": "i8m3lzUGmP_XJi_mMw9cr0oQZ_R0VvKb"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T11:52:11.269802+00:00",
+      "finalized_at": "2026-09-08T11:52:12.40084+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/bb8445f9021ca1a76238fdf36be511b917cd3c7f98125d8789f9049de2e946f3",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "bb8445f9021ca1a76238fdf36be511b917cd3c7f98125d8789f9049de2e946f3",
+        "size_bytes": 4511,
+        "version_id": "I.brqmA0iZw83gUIvgm_Td1e.mJ2hrjs"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/c756684ddf113ec48c4dbc0a68319d0e34dc59133a890bbb959feab0f387685c",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "c756684ddf113ec48c4dbc0a68319d0e34dc59133a890bbb959feab0f387685c",
+        "size_bytes": 3583,
+        "version_id": "7Qb6eTXkBGnq2tF4fuVNA2.P8_Rk2xws"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-a9a43c85f5d06964dd4036ff94c108d3",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-a9a43c85f5d06964dd4036ff94c108d3"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34222826865",
+    "dashboard": "http://localhost:18080/?receipt=546d60bb-2e4f-447f-bf16-55beb0c1d5ef",
+    "live_capture_command": "acca0949-b0ce-43f1-8f86-f942ecdaca9c"
+  },
+  {
+    "scenario": "test-failure",
+    "run_id": "34223014427",
+    "attempt": 1,
+    "workflow": "failure",
+    "receipt": {
+      "id": "d499ac9e-1663-43a3-bb11-d59d37d0b0b6",
+      "job_id": "guarded",
+      "run_id": "34223014427",
+      "verdict": "pass",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": null,
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T11:53:05.898142+00:00",
+      "ingested_at": "2026-09-08T11:54:26.160559+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/8129e95101733080cba9e19a3e6cd7cec5d9e0ec5815dca247134d15518b11bf",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "8129e95101733080cba9e19a3e6cd7cec5d9e0ec5815dca247134d15518b11bf",
+          "size_bytes": 319072,
+          "version_id": "Dk1xnNbG5zEfuE3FE4wHbH88i0.6Slhi"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T11:54:20.621565+00:00",
+      "finalized_at": "2026-09-08T11:54:21.685339+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/580903e27ac3f677269e77319cae144f0516c70fe1dd72813bbe480c5c00ce72",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "580903e27ac3f677269e77319cae144f0516c70fe1dd72813bbe480c5c00ce72",
+        "size_bytes": 4511,
+        "version_id": "z7IoYMuwl1L.0qfPRjgzUHj27viquvSx"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/51dd86637fc931c0f6cf1b8e6626eaa909f260c3a329eb357e205f089f2ca174",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "51dd86637fc931c0f6cf1b8e6626eaa909f260c3a329eb357e205f089f2ca174",
+        "size_bytes": 3583,
+        "version_id": "I32gDqbmUQNf20MrgNsFOFqAEaBmjuyS"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-ed60ed93be75f3eddf233483b91bec8c",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-ed60ed93be75f3eddf233483b91bec8c"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34223014427",
+    "dashboard": "http://localhost:18080/?receipt=d499ac9e-1663-43a3-bb11-d59d37d0b0b6",
+    "live_capture_command": "ae1a018d-25ef-4c89-b49e-01b65f2647f3"
+  },
+  {
+    "scenario": "cleanup-blocked",
+    "run_id": "34223206048",
+    "attempt": 1,
+    "workflow": "failure",
+    "receipt": {
+      "id": "bf9d985f-c81d-4835-9a48-8a859ac1eff3",
+      "job_id": "guarded",
+      "run_id": "34223206048",
+      "verdict": "fail",
+      "coverage": {
+        "logs": {
+          "reason": "logs: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "resources": {
+          "reason": "resources: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "workspace": {
+          "reason": "workspace: failed (job observation). See signed archive for details.",
+          "status": "failed",
+          "observer": "job"
+        },
+        "credentials": {
+          "reason": "credentials: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        },
+        "runner_disposal": {
+          "reason": "runner disposal: verified (trusted observation). See signed archive for details.",
+          "status": "verified",
+          "observer": "trusted"
+        }
+      },
+      "incident": {
+        "id": "0c768f22-d51f-447c-8958-81002e58c5b1",
+        "state": "open",
+        "reason": "Cleanup fail. Inspect component coverage and independently verify the archived evidence.",
+        "issue_key": "cleanup:bf9d985f-c81d-4835-9a48-8a859ac1eff3",
+        "created_at": "2026-09-08T11:56:36.522463+00:00",
+        "receipt_id": "bf9d985f-c81d-4835-9a48-8a859ac1eff3",
+        "reason_code": "cleanup_fail",
+        "resolved_at": null,
+        "github_issue_url": null
+      },
+      "job_name": "guarded",
+      "provider": "github",
+      "workflow": "GitHub Actions",
+      "repository": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "started_at": "2026-09-08T11:55:14.853243+00:00",
+      "ingested_at": "2026-09-08T11:56:36.522463+00:00",
+      "log_objects": [
+        {
+          "key": "evidence/sha256/03748db13a2345c4629605532df817c044a7f6e07473d152bc37faefd9ad8f62",
+          "store": "aws-evidence",
+          "bucket": "cleanup-evidence-385020093237-us-east-1",
+          "sha256": "03748db13a2345c4629605532df817c044a7f6e07473d152bc37faefd9ad8f62",
+          "size_bytes": 318873,
+          "version_id": "TA_QHUmnikehoywfsoEEQGrjUrWKgXzU"
+        }
+      ],
+      "run_attempt": 1,
+      "completed_at": "2026-09-08T11:56:29.894634+00:00",
+      "finalized_at": "2026-09-08T11:56:31.013923+00:00",
+      "bundle_object": {
+        "key": "evidence/sha256/b4a3cd6f024716476e39c4637b5159c4ccd82c365219b67530b98d4ed0875d57",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "b4a3cd6f024716476e39c4637b5159c4ccd82c365219b67530b98d4ed0875d57",
+        "size_bytes": 4558,
+        "version_id": "dp1_0PRtGLWQ6wQlFcDPSAsmNBq22OmL"
+      },
+      "repository_id": "Aditya3304/ephemeral-runner-cleanup-receipt",
+      "signer_issuer": "https://issuer:8443",
+      "receipt_object": {
+        "key": "evidence/sha256/fd1bf5e325b2008a33317b0c645d605ae845757cf66b3ae483759841b81f0f9f",
+        "store": "aws-evidence",
+        "bucket": "cleanup-evidence-385020093237-us-east-1",
+        "sha256": "fd1bf5e325b2008a33317b0c645d605ae845757cf66b3ae483759841b81f0f9f",
+        "size_bytes": 3562,
+        "version_id": ".5ooLxf8R1I6V4aVzwJ7OIke4JU5dX2v"
+      },
+      "schema_version": 1,
+      "signature_state": "verified",
+      "signer_identity": "finalizer@cleanup-receipt.local",
+      "source_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+      "resource_summary": {
+        "evidence_status": "accepted-untrusted",
+        "runner_namespace": "proof-runner-32380b94808f33484cbc07f4175d0afd",
+        "finalizer_revision": "9605c536dd49faeb3acf6a80a60ec1136ad604c0",
+        "resource_namespace": "proof-32380b94808f33484cbc07f4175d0afd"
+      },
+      "trust_root_sha256": "e8389b84f266cdc9d4e080dd398e1f8cf500bd81f485bcba3212e4dfb9c1bff3"
+    },
+    "url": "https://github.com/Aditya3304/ephemeral-runner-cleanup-receipt/actions/runs/34223206048",
+    "dashboard": "http://localhost:18080/?receipt=bf9d985f-c81d-4835-9a48-8a859ac1eff3",
+    "live_capture_command": "384d70e8-0bd7-4e5b-8b41-9d10c85fe1bb"
+  }
+]
